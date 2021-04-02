@@ -5,7 +5,7 @@
 VERSION_FILE="current_version.info"
 PROJECT_NAME=behind-nat-file-storage
 GIT_URL=https://github.com/ujagaga/$PROJECT_NAME.git
-GIT_BRANCH=main
+GIT_BRANCH=master
 APP_NAME=src/bnfs
 TEMP_DIR="/tmp"    # Use /tmp in RAM to reduce file system wear. The repo should never be too big anyway.
 UPDATES_FILE="./update.info"
