@@ -1,0 +1,11 @@
+[Unit]
+Description=External access tunnel
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/opt/bnfs/tunnel_starter.sh
+
+[Install]
+WantedBy=multi-user.target
+

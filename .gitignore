@@ -1,0 +1,5 @@
+.vscode/
+.idea
+*.cfg
+bnfs
+current_version.info

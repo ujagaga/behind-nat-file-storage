@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>FS Preferences</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/_static_web_files/favicon.ico"/>
+    <link rel="stylesheet" href="/_static_web_files/css/default.css">
+    <link rel="stylesheet" href="/_static_web_files/css/fontawsome_all.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row" id="nav-bar">
+        <p id="home-btn" title="Home"><a href="/"><i class="fa fa-home fa-lg"></i></a></p>
+        <p id="update-btn" title="Check for updates" onclick="chk_update();"><i class="fa fa-calendar-check fa-lg"></i></p>
+        <p id="pwr-btn" title="Restart computer"><a href="/api/restart"><i class="fa fa-power-off fa-lg"></i></p>
+        <p id="logout-btn" title="Logout"><a href="/api/logout"><i class="fa fa-sign-out-alt fa-lg"></i></a></p>
+      </div>
+      <div class="rounded border bg-light" id="preferences-div">
+        <div class="margin-div">
+          <h1 class="text-muted">Preferences</h1>
+          
+          <label for="username">User Name</label>
+          <input type="username" id="username">
+
+          <label for="new_pass">New password</label>
+          <input type="password" id="new_pass" name="new_pass">
+
+          <label for="confirm_pass">Confirm new password</label>
+          <input type="password" placeholder="Confirm new password" id="confirm_pass" name="confirm_pass">
+
+          <input type="checkbox" name="require_login" id="require_login">
+          <label for="require_login">Require login in local network</label>
+          <i class="fa fa-question-circle fa-lg" onclick="popup_description(event, 
+          'If unchecked no login will be required on local network. If accessed from outside of local network, ' + 
+          'the login will still be required.');"></i>
+          <br><hr><br>
+
+          <label for="subdomain">Select subdomain for external access</label>
+          <i class="fa fa-question-circle fa-lg" onclick="popup_description(event, 
+          'Prefix to the external web address to avoid assigning a random one at every restart.' + 
+          ' This way the shared items will always be available via same shared link.');"></i>
+          <input type="text" id="subdomain">
+
+          <button onclick="save_prefs();">Save</button>
+        </div>     
+      </div>
+    </div>
+  </body>
+  <script src="/_static_web_files/js/jquery-3.6.0.min.js"></script>
+  <script src="/_static_web_files/js/popup.js"></script>
+  <script src="/_static_web_files/js/preferences.js"></script>  
+</html>

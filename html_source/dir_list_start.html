@@ -1,0 +1,42 @@
+// If you need to add comments just use double slash.
+// 
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <title>File Browser</title>
+
+    <link rel="icon" type="image/png" href="/_static_web_files/favicon.ico"/>
+
+    <script src="/_static_web_files/js/jquery-3.6.0.min.js"></script>
+    <script src="/_static_web_files/js/default.js"></script>
+    <link rel="stylesheet" href="/_static_web_files/css/default.css">
+    <link rel="stylesheet" href="/_static_web_files/css/fontawsome_all.css">
+
+</head>
+<body>
+    <div class="container">
+        <input type="hidden" id="dirpath" value="%.*s"/>
+        <input type="hidden" id="ro_flag" value="%s"/>
+        <input type="file" id="uploadf" style="display: none"/>
+
+        <div class="row" id="nav-bar">
+            <p id="home-btn" title="Home"><a href="/"><i class="fa fa-home fa-lg"></i></a></p>
+            <p id="path"></p>
+            <p id="preferences-btn" title="preferences"><a href="/api/preferences"><i class="fa fa-wrench fa-lg"></i></a></p>
+            <p id="logout-btn" title="Logout"><a href="/api/logout"><i class="fa fa-sign-out-alt fa-lg"></i></a></p>
+        </div>
+        <div id="table-div">
+            <table cellpadding="0" id="flist">
+                <thead>
+                    <tr>
+                        <th onclick="sortTableByName();">Name</th>
+                        <th onclick="sortTableByModified();">Modified</th>
+                        <th onclick="sortTableByFileSize();">Size</th>
+                    </tr> 
+                </thead>
+            <tbody id="tb">
+// Do not add anything bellow line. This is where the table contents will be populated in the "mongoose.c" 
