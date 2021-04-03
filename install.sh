@@ -130,7 +130,7 @@ if [ "$OK" == "y" ]; then
     echo "[Service]"
     echo Type=simple
     echo RemainAfterExit=yes
-    echo ExecStart=/opt/bnfs/bin/tunnel_starter.sh
+    echo ExecStart=/opt/bnfs/bin/tunnel_starter.sh $PORT
     echo
     echo "[Install]"
     echo WantedBy=multi-user.target
