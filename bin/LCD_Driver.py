@@ -49,7 +49,7 @@ LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 E_PULSE = 0.0005
 E_DELAY = 0.0005
 SERVER_BUSY_TIMEOUT = 10
-SCREEN_OFF_TIMEOUT = 60
+SCREEN_OFF_TIMEOUT = 300
 PING_TIMEOUT = 60
 tunnel_url = ""
 CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".bnfs", "settings.cfg")
@@ -58,7 +58,7 @@ last_ping_status = 0
 lcd_lines = ["", ""]
 lcd_pos = [0, 0]
 lcd_pause_count = [0, 0]
-screen_always_on_flag = False
+screen_always_on_flag = True
 
 
 # Read configuration file to extract tunnel subdomain
@@ -165,35 +165,34 @@ def main():
 
     lcd_init()
     counter = 0
-    while True:
-        if counter > 4:
-            msg = "Busy"
+    while True:        
+        msg = "Busy"
+        busy = server_busy()
+        while "BUSY" in busy:
+            lcd_lines[0] = msg
+            msg += "."
+            if len(msg) > 16:
+                msg = "Busy"
+
+            refresh_lcd()
+            time.sleep(1)
             busy = server_busy()
-            while "BUSY" in busy:
-                lcd_lines[0] = msg
-                msg += "."
-                if len(msg) > 16:
-                    msg = "Busy"
 
-                refresh_lcd()
-                time.sleep(1)
-                busy = server_busy()
+        ipAddr = get_ip()
+        lcd_lines[0] = ipAddr
+        # lcd_string(ipAddr, LCD_LINE_1)
 
-            ipAddr = get_ip()
-            lcd_lines[0] = ipAddr
-            # lcd_string(ipAddr, LCD_LINE_1)
-
-            if "FREE" in busy:
-                if (time.time() - last_ping_time) > PING_TIMEOUT:
-                    tunnel_status = get_tunnel_status()
-                    if tunnel_status is not None:
-                        if tunnel_status:
-                            lcd_lines[1] = tunnel_url
-                            # lcd_string(tunnel_url, LCD_LINE_2)
+        if "FREE" in busy:
+            if (time.time() - last_ping_time) > PING_TIMEOUT:
+                tunnel_status = get_tunnel_status()
+                if tunnel_status is not None:
+                    if tunnel_status:
+                        lcd_lines[1] = tunnel_url
+                        # lcd_string(tunnel_url, LCD_LINE_2)
 
         refresh_lcd()
         counter += 1
-        time.sleep(1)  # 5 second delay
+        time.sleep(1)  
 
 
 def lcd_init():
