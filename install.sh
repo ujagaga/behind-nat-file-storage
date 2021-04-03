@@ -1,11 +1,11 @@
 #!/bin/bash
 
-INSTALL_DIR=/opt/bnfs
+INSTALL_DIR="/opt/bnfs"
 PROJECT_NAME=behind-nat-file-storage
 GIT_URL=https://github.com/ujagaga/$PROJECT_NAME.git
 GIT_BRANCH=master
 TEMP_DIR="/tmp"
-UPDATES_FILE="./update.info"
+UPDATES_FILE="update.info"
 APP_NAME=bnfs
 SRC_DIR=src
 USB_MOUNT_PACKET=usbmount_0.0.24_all.deb
@@ -14,13 +14,20 @@ LOGFILE="install.log"
 # Make sure we are in the script dir and not working in the caller dir.
 SCRIPT="$(realpath -s $0)"
 SCRIPT_DIR="$(dirname $SCRIPT)"
+rm -rf $INSTALL_DIR
 
 redecho(){
   echo "$(tput setaf 1)${1}$(tput sgr0)"
 }
 
-log(){
-  echo "$(1)" >> $INSTALL_DIR/$LOGFILE
+logwrite(){
+  echo "${1}" >> "$INSTALL_DIR/$LOGFILE"
+}
+
+logecho(){
+  echo "$(tput setaf 1)${1}$(tput sgr0)"
+  echo "${1}" >> $INSTALL_DIR/$LOGFILE
+  echo "Log saved to $INSTALL_DIR/$LOGFILE"
 }
 
 # Make sure we are running as root so we can install dependencies.
@@ -30,7 +37,9 @@ if (( $EUID != 0 )); then
 fi
 
 echo
+echo "------------------------------------------------------------------"
 echo '*************** "Behind NAT File Server" installer ***************'
+echo "------------------------------------------------------------------"
 
 OK=n
 while [ $OK != "y" ]
@@ -43,52 +52,52 @@ do
   read -r -p "Folder to serve (default: /media/usb0): " SERVE_DIR
   SERVE_DIR=${SERVE_DIR:-/media/usb0}
 
-  SAMPLE=$(cat /dev/urandom | tr -dc 'a-z' | fold -w 8 | head -n 1)
-  read -r -p "Subdomain for external access (default, random, can be changed later: $SAMPLE): " SUBDOMAIN
-  SUBDOMAIN=${SUBDOMAIN:-$SAMPLE}
-
   echo
   read -r -p "Is this setup acceptable (N/y)? " OK
   OK=${OK:-n}
 done
 
+mkdir $INSTALL_DIR
+echo
 echo "*************** Installing dependencies ***************"
-apt install python3-pip git python3-dev i2c-tools python3-libgpiod nodejs npm
+apt install -y python3-pip git python3-dev i2c-tools python3-libgpiod nodejs npm
 pip3 install OrangePi.GPIO
 npm install -g localtunnel
-log "Installed python3-pip git python3-dev i2c-tools python3-libgpiod nodejs npm OrangePi.GPIO and localtunnel."
+
+logwrite "Installed python3-pip git python3-dev i2c-tools python3-libgpiod nodejs npm OrangePi.GPIO and localtunnel."
 echo
 read -r -p "Do you want to install usbmount library to automatically mount usb storage (N/y)? " OK
 OK=${OK:-n}
 if [ "$OK" == "y" ]; then
   # Install USBMOUNT library from source
-  cd $TEMP_DIR || { redecho "ERROR: Could not find temp dir: $TEMP_DIR"; exit 1; }
-  apt install debhelper build-essential && log "Installed debhelper and build-essential."
+  cd $TEMP_DIR || { logecho "ERROR: Could not find temp dir: $TEMP_DIR"; exit 1; }
+  apt install -y debhelper build-essential && logwrite "Installed debhelper and build-essential."
+  echo "cleaning up if necessary"
+  rm -rf usbmount
   git clone https://github.com/rbrito/usbmount
   cd usbmount
   dpkg-buildpackage -us -uc -b
   cd ..
-  apt install ./usbmount*.deb &&
+  apt install -y ./usbmount*.deb
   if [[ $? > 0 ]]
   then
-      log "Failed to install usb mount package."
+      logwrite "Failed to install usb mount package."
   else
-      log "Installed usb mount package."
+      logwrite "Installed usb mount package."
   fi
 fi
 
 echo
 echo "*************** Downloading app files ***************"
-mkdir $INSTALL_DIR
 # Fetch the repository.
 cd $TEMP_DIR || { redecho "ERROR: Could not find temp dir: $TEMP_DIR"; exit 1; }
-echo cleaning up if necessary
+echo "cleaning up if necessary"
 rm -rf $PROJECT_NAME
 git clone $GIT_URL
 cd $PROJECT_NAME || { redecho "ERROR: Could not find repository folder: $PROJECT_NAME. Are you sure the configured repository exists"; exit 1; }
 git checkout $GIT_BRANCH
 
-$SRC_DIR./build.sh
+$SRC_DIR/build.sh
 
 while read p; do
     if [[ -d $p ]]; then
@@ -96,7 +105,7 @@ while read p; do
     elif [[ -f $p ]]; then
         mv -f $p $INSTALL_DIR
     fi
-done < $INSTALL_DIR/$UPDATES_FILE
+done < $UPDATES_FILE
 
 # Check last commit timestamp
 GIT_LOG="$(git log -1 --date=raw | grep Date)"
@@ -121,14 +130,15 @@ if [ "$OK" == "y" ]; then
     echo "[Service]"
     echo Type=simple
     echo RemainAfterExit=yes
-    echo ExecStart=/opt/bnfs/tunnel_starter.sh
+    echo ExecStart=/opt/bnfs/bin/tunnel_starter.sh
     echo
     echo "[Install]"
     echo WantedBy=multi-user.target
   } > $TUNNEL_FILE
   systemctl enable $TUNNEL_FILE
+  logwrite "Enabled external access tunnel."
 else
-
+  logwrite "External access tunnel not enabled."
 fi
 
 echo
@@ -148,12 +158,15 @@ if [ "$OK" == "y" ]; then
     echo Restart=always
     echo RestartSec=10
     echo RemainAfterExit=yes
-    echo ExecStart=/opt/bnfs/LCD_Driver.py
+    echo ExecStart=/opt/bnfs/bin/LCD_Driver.py
     echo
     echo "[Install]"
     echo WantedBy=multi-user.target
   } > $LCD_FILE
   systemctl enable $LCD_FILE
+  logwrite "Enabled LCD display driver."
+else
+  logwrite "LCD display driver not enabled."
 fi
 
 echo
@@ -182,8 +195,9 @@ if [ "$OK" == "y" ]; then
     echo WantedBy=multi-user.target
   } > $BNFS_FILE
   systemctl enable $BNFS_FILE
+  logwrite "Enabled BNFS at startup."
+else
+  logwrite "BNFS not enabled at startup."
 fi
 
-
-
-
+echo "Full log is available at:  $INSTALL_DIR/$LOGFILE"

@@ -49,6 +49,7 @@ LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 E_PULSE = 0.0005
 E_DELAY = 0.0005
 SERVER_BUSY_TIMEOUT = 10
+SCREEN_OFF_TIMEOUT = 60
 PING_TIMEOUT = 60
 tunnel_url = ""
 CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".bnfs", "settings.cfg")
@@ -57,11 +58,13 @@ last_ping_status = 0
 lcd_lines = ["", ""]
 lcd_pos = [0, 0]
 lcd_pause_count = [0, 0]
+screen_always_on_flag = False
 
 
 # Read configuration file to extract tunnel subdomain
 def get_config():
     global tunnel_url
+    global screen_always_on_flag
 
     tunnel_url = ""
     with open(CONFIG_PATH, "r") as file:
@@ -69,6 +72,8 @@ def get_config():
             if "SUBDOMAIN" in line:
                 tunnel_subdomain = line.replace("\n", "").split(" ")[1].strip()
                 tunnel_url = "https://{}.loca.lt".format(tunnel_subdomain)
+            if "SCREEN_ON" in line:
+                screen_always_on_flag = "Y" in line.replace("\n", "").split(" ")[1].strip()
 
 
 # Pings the bnfs server via open tunnel to confirm connectivity
@@ -76,6 +81,9 @@ def get_tunnel_status():
     global last_ping_time
     global last_ping_status
 
+    if len(tunnel_url) < 2:
+        return False
+        
     try:
         print('Pinging: ', tunnel_url)
         resp = req.get(tunnel_url + "/api/status", headers={"Bypass-Tunnel-Reminder": "random-value"}, timeout=5)
@@ -117,6 +125,11 @@ def server_busy():
             if last_op_period < SERVER_BUSY_TIMEOUT:
                 return "BUSY"
             else:
+                if screen_always_on_flag or last_op_period < SCREEN_OFF_TIMEOUT:
+                    GPIO.output(LCD_LED, 1)
+                else:
+                    GPIO.output(LCD_LED, 0)
+                
                 return "FREE"
         except Exception as pe:
             print("\nERR parsing response:", pe)
@@ -303,4 +316,5 @@ if __name__ == '__main__':
     finally:
         lcd_byte(0x01, LCD_CMD)
         lcd_string("", LCD_LINE_1)
+        GPIO.output(LCD_LED, 0)
         GPIO.cleanup()
