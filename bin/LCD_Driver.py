@@ -7,7 +7,7 @@ Helper script to drive the I2C 16x2 LCD on Orange Pi Zero. It displays the curre
 # 2 : 5V
 # 3 : Contrast (0-5V)*
 # 4 : RS (Register Select)    GPIO7 (12)
-# 5 : R/W (Read Write)       - GROUND THIS PIN
+# 5 : R/W (Read Write)        GROUND THIS PIN
 # 6 : Enable or Strobe        GPIO19 (16)
 # 7 : Data Bit 0             - NOT USED
 # 8 : Data Bit 1             - NOT USED
@@ -17,7 +17,7 @@ Helper script to drive the I2C 16x2 LCD on Orange Pi Zero. It displays the curre
 # 12: Data Bit 5              GPIO2 (22)
 # 13: Data Bit 6              GPIO13 (24)
 # 14: Data Bit 7              GPIO10 (26)
-# 15: LCD Backlight +5V**
+# 15: LCD Backlight +5V       GPIO198 (8)
 # 16: LCD Backlight GND
 
 import OPi.GPIO as GPIO
@@ -35,6 +35,7 @@ LCD_D4 = 18
 LCD_D5 = 22
 LCD_D6 = 24
 LCD_D7 = 26
+LCD_LED = 8
 
 # Define some device constants
 LCD_WIDTH = 16    # Maximum characters per line
@@ -146,6 +147,8 @@ def main():
     GPIO.setup(LCD_D5, GPIO.OUT)
     GPIO.setup(LCD_D6, GPIO.OUT)
     GPIO.setup(LCD_D7, GPIO.OUT)
+    GPIO.setup(LCD_LED, GPIO.OUT)
+    GPIO.output(LCD_LED, 1)
 
     lcd_init()
     counter = 0

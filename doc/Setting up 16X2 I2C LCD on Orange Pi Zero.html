@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0081)file:///home/rada/Projects/behind-nat-file-storage/doc/LCD_16X2_OrangePiZero.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>Setting up 16X2 I2C LCD on Orange Pi Zero</title>
+</head>
+<body>
+    <h2>The wiring for the LCD</h2>
+    <div class="table-div">
+		<table>   
+			<tbody>
+				<tr>
+					<th>LCD pin<br>number</th><th>LCD pin name</th><th>OPIZ pin name</th><th>OPIZ pin<br>number</th>
+				</tr>
+				<tr> <td>1</td> <td>GND</td><td>GROUND</td><td>6</td> </tr>
+				<tr> <td>2</td> <td>5V</td> <td>5V PWR</td> <td>2</td> </tr>
+				<tr> <td>3</td> <td>Contrast (0-5V)</td> <td>GROUND</td> <td>6</td> </tr>
+				<tr> <td>4</td> <td>RS (Register Select)</td> <td>GPIO7</td> <td>12</td></tr>
+				<tr> <td>5</td> <td>R/W (Read Write)</td> <td>GROUND</td> <td>6</td></tr>
+				<tr> <td>6</td> <td>Enable or Strobe</td> <td>GPIO19</td> <td>16</td></tr>
+				<tr> <td>7</td> <td>Data Bit 0</td> <td>NOT USED</td> <td></td></tr>
+				<tr> <td>8</td> <td>Data Bit 1</td> <td>NOT USED</td> <td></td></tr>
+				<tr> <td>9</td> <td>Data Bit 2</td> <td>NOT USED</td> <td></td></tr>
+				<tr> <td>10</td> <td>Data Bit 3</td> <td>NOT USED</td> <td></td></tr>
+				<tr> <td>11</td> <td>Data Bit 4</td> <td>GPIO18</td> <td>18</td></tr>
+				<tr> <td>12</td> <td>Data Bit 5</td> <td>GPIO2</td> <td>22</td></tr>
+				<tr> <td>13</td> <td>Data Bit 6</td> <td>GPIO13</td> <td>24</td></tr>
+				<tr> <td>14</td> <td>Data Bit 7</td> <td>GPIO10</td> <td>26</td></tr>
+				<tr> <td>15</td> <td>LCD Backlight +5V</td> <td>GPIO198</td> <td>8</td></tr>
+				<tr> <td>16</td> <td>LCD Backlight GND</td> <td>GROUND</td> <td>6</td></tr>
+			</tbody>
+		</table>
+		<p>According to datasheet you can connect LCD pin3 (contrast) to GND, <br>but I found image to be clearer
+			when using a 1K resistor to GND and<br>a 10K resistor to +5V.</p>		
+	</div>
+	<div class="img-div">
+		<p>LCD 16x2</p>
+		<img src="./Setting up 16X2 I2C LCD on Orange Pi Zero_files/16x2_lcd_module.jpg" width="300" height="auto">
+		<p>Orange Pi Zero</p>
+		<img src="./Setting up 16X2 I2C LCD on Orange Pi Zero_files/opiz.jpg" width="600" height="auto">
+	</div>
+
+
+<style>
+.table-div{
+	max-width: 490px;
+	float:left;
+	display: inline-block;
+}
+.img-div{
+	padding-left: 20px;	
+	display: inline-block;
+}
+td, th{
+	padding-right: 1em;	
+	border-bottom: 1px solid gray;	
+}
+
+
+</style>
+</body></html>
