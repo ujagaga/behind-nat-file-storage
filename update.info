@@ -1,8 +1,6 @@
-# Please update this list if you change files/folders that will need to be replaced during an update
+# This is a list of files to be copied during update
 
 _static_web_files/
-helper_scripts/file_ops_helper.py
-helper_scripts/LCD_Driver.py
-helper_scripts/tunnel_starter.sh
+bin/
 README.md
 updater.sh

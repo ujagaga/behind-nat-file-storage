@@ -8,19 +8,25 @@ TEMP_DIR="/tmp"
 UPDATES_FILE="./update.info"
 APP_NAME=bnfs
 SRC_DIR=src
+USB_MOUNT_PACKET=usbmount_0.0.24_all.deb
+LOGFILE="install.log"
 
 # Make sure we are in the script dir and not working in the caller dir.
 SCRIPT="$(realpath -s $0)"
 SCRIPT_DIR="$(dirname $SCRIPT)"
 
 redecho(){
-    echo "$(tput setaf 1)${1}$(tput sgr0)"
+  echo "$(tput setaf 1)${1}$(tput sgr0)"
+}
+
+log(){
+  echo "$(1)" >> $INSTALL_DIR/$LOGFILE
 }
 
 # Make sure we are running as root so we can install dependencies.
 if (( $EUID != 0 )); then
-    redecho "Please run as root!"
-    exit 1
+  redecho "Please run as root!"
+  exit 1
 fi
 
 echo
@@ -50,6 +56,27 @@ echo "*************** Installing dependencies ***************"
 apt install python3-pip git python3-dev i2c-tools python3-libgpiod nodejs npm
 pip3 install OrangePi.GPIO
 npm install -g localtunnel
+log "Installed python3-pip git python3-dev i2c-tools python3-libgpiod nodejs npm OrangePi.GPIO and localtunnel."
+echo
+read -r -p "Do you want to install usbmount library to automatically mount usb storage (N/y)? " OK
+OK=${OK:-n}
+if [ "$OK" == "y" ]; then
+  # Install USBMOUNT library from source
+  cd $TEMP_DIR || { redecho "ERROR: Could not find temp dir: $TEMP_DIR"; exit 1; }
+  apt install debhelper build-essential && log "Installed debhelper and build-essential."
+  git clone https://github.com/rbrito/usbmount
+  cd usbmount
+  dpkg-buildpackage -us -uc -b
+  cd ..
+  apt install ./usbmount*.deb &&
+  if [[ $? > 0 ]]
+  then
+      log "Failed to install usb mount package."
+  else
+      log "Installed usb mount package."
+  fi
+fi
+
 echo
 echo "*************** Downloading app files ***************"
 mkdir $INSTALL_DIR
@@ -61,24 +88,15 @@ git clone $GIT_URL
 cd $PROJECT_NAME || { redecho "ERROR: Could not find repository folder: $PROJECT_NAME. Are you sure the configured repository exists"; exit 1; }
 git checkout $GIT_BRANCH
 
-cd $SRC_DIR || { rm -rf $INSTALL_DIR; redecho "ERROR: Directory $TEMP_DIR/$PROJECT_NAME/$SRC_DIR DOES NOT exist. Can not continue."; exit 1; }
-./build.sh
+$SRC_DIR./build.sh
 
-if [ ! -f "$APP_NAME" ];then
-    redecho "ERROR: Application file $APP_NAME DOES NOT exist. Can not continue."
-    rm -rf $INSTALL_DIR
-    exit 1
-fi
-
-mv $APP_NAME $INSTALL_DIR
-cd ..
 while read p; do
     if [[ -d $p ]]; then
-        cp -rf $p $SCRIPT_DIR
+        cp -rf $p $INSTALL_DIR
     elif [[ -f $p ]]; then
-        mv -f $p $SCRIPT_DIR
+        mv -f $p $INSTALL_DIR
     fi
-done < $UPDATES_FILE
+done < $INSTALL_DIR/$UPDATES_FILE
 
 # Check last commit timestamp
 GIT_LOG="$(git log -1 --date=raw | grep Date)"
@@ -91,7 +109,7 @@ rm -rf $TEMP_DIR/$PROJECT_NAME
 echo
 read -r -p "Enable external tunnel at startup (N/y)? " OK
 OK=${OK:-n}
-if [ "$OK" != "y" ]; then
+if [ "$OK" == "y" ]; then
   cd /etc/systemd/system/ || { redecho "ERROR: Could not find /etc/systemd/system/. Are you sure this is a compatible platform?"; exit 1; }
 
   # Create external tunnel service
@@ -109,12 +127,14 @@ if [ "$OK" != "y" ]; then
     echo WantedBy=multi-user.target
   } > $TUNNEL_FILE
   systemctl enable $TUNNEL_FILE
+else
+
 fi
 
 echo
 read -r -p "Enable 16x2 LCD driver at startup (N/y)? " OK
 OK=${OK:-n}
-if [ "$OK" != "y" ]; then
+if [ "$OK" == "y" ]; then
   cd /etc/systemd/system/ || { redecho "ERROR: Could not find /etc/systemd/system/. Are you sure this is a compatible platform?"; exit 1; }
 
   # Create 16x2 LCD service
@@ -139,7 +159,7 @@ fi
 echo
 read -r -p "Enable Behind NAT file server at startup (N/y)? " OK
 OK=${OK:-n}
-if [ "$OK" != "y" ]; then
+if [ "$OK" == "y" ]; then
   cd /etc/systemd/system/ || { redecho "ERROR: Could not find /etc/systemd/system/. Are you sure this is a compatible platform?"; exit 1; }
 
   # Create BNFS service
@@ -156,7 +176,7 @@ if [ "$OK" != "y" ]; then
     echo RestartSec=10
     echo RemainAfterExit=yes
     echo User=root
-    echo ExecStart=/opt/bnfs/$APP_NAME -p $PORT -d $SERVE_DIR
+    echo ExecStart=/opt/bnfs/bin/bnfs -p $PORT -d $SERVE_DIR
     echo
     echo "[Install]"
     echo WantedBy=multi-user.target

@@ -190,7 +190,11 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
     }else if (mg_http_match_uri(hm, "/favicon.ico")) { 
       // Browsers tend to ask for favicon at load. Do not wish to count this as operation, but lets serve it to avoid 404.
-      struct mg_http_serve_opts opts = {FAVICON_PATH, s_ssi_pattern};
+      static char favicon_path[PATH_MAX] = {0};
+      strcpy(favicon_path, current_path);
+      strcat(favicon_path, FAVICON_PATH);
+
+      struct mg_http_serve_opts opts = {favicon_path, s_ssi_pattern};
       mg_http_serve_dir(c, ev_data, &opts);  
       set_timestamp_flag = false;   
 

@@ -6,7 +6,6 @@ VERSION_FILE="current_version.info"
 PROJECT_NAME=behind-nat-file-storage
 GIT_URL=https://github.com/ujagaga/$PROJECT_NAME.git
 GIT_BRANCH=master
-APP_NAME=src/bnfs
 TEMP_DIR="/tmp"    # Use /tmp in RAM to reduce file system wear. The repo should never be too big anyway.
 UPDATES_FILE="./update.info"
 
@@ -40,8 +39,6 @@ if [ "$GIT_TIMESTAMP" -gt "$CURRENT_V" ]; then
     echo "Updating..."
 
     src/build.sh
-    # Copy necessary items to script directory
-    mv $APP_NAME $SCRIPT_DIR
 
     while read p; do
         if [[ -d $p ]]; then
