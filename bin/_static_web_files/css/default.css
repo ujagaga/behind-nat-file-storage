@@ -233,6 +233,7 @@ td:nth-child(4) {
     width: 1em;
     margin: 1em 0.2em;
     display: inline-block;
+
 }
 
 .margin-div h1{
@@ -240,7 +241,16 @@ td:nth-child(4) {
     padding: 0;
 }
 
-.margin-div i{
+.margin-div label{
+    display: inline-block;
+    width: calc(100% - 30px);
+}
+
+.margin-div label[for=subdomain]{
+    width: calc(100% - 7px);
+}
+
+.helpmark{
     float: right;
     cursor: help;
     color: #17a2b8;
@@ -415,6 +425,10 @@ td:nth-child(4) {
 
     #path{
         max-width: calc(100% - 100px);
+    }
+
+    .margin-div label[for=subdomain]{
+        width: calc(100% - 14px);
     }
 
 }

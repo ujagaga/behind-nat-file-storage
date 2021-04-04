@@ -31,23 +31,24 @@
           <input type="password" placeholder="Confirm new password" id="confirm_pass" name="confirm_pass">
 
           <input type="checkbox" name="require_login" id="require_login">
-          <label for="require_login">Require login in local network</label>
+          <label for="require_login">Require login in local network<span class="helpmark">
           <i class="fa fa-question-circle fa-lg" onclick="popup_description(event, 
-          'If unchecked no login will be required on local network. If accessed from outside of local network, ' + 
-          'the login will still be required.');"></i>
+          'If unchecked no login will be required on local network. If accessed from outside of local network, the login will still be required.');"></i>
+          </span></label>
           <br><hr><br>
 
-          <label for="subdomain">Select subdomain for external access</label>
+          <label for="subdomain">Select subdomain for external access<span class="helpmark">
           <i class="fa fa-question-circle fa-lg" onclick="popup_description(event, 
           'Prefix to the external web address to avoid assigning a random one at every restart.' + 
-          ' This way the shared items will always be available via same shared link.');"></i>
+          ' This way the shared items will always be available via same shared link.');"></i></span></label>
           <input type="text" id="subdomain">
 
           <br><hr><br>
           <input type="checkbox" name="screen_always_on" id="screen_always_on">
-          <label for="screen_always_on">Display always on</label>
+          <label for="screen_always_on">Display always on<span class="helpmark">
           <i class="fa fa-question-circle fa-lg" onclick="popup_description(event, 
           'If unchecked the display will turn off after few minutes of inactivity.');"></i>
+          </span></label>
 
           <button onclick="save_prefs();">Save</button>
         </div>     

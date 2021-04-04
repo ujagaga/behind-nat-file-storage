@@ -105,12 +105,13 @@ window.onload = function() {
         dataType: 'json',
         data: {},
         cache: false,            
-        success: function (response) {            
+        success: function (response) {     
             $('#username').val(response.admin_uname);
             $('#new_pass').val(response.admin_pass);
             $('#confirm_pass').val(response.admin_pass);
             $('#subdomain').val(response.subdomain);
             $('#require_login').prop('checked', response.require_local_pass);
+            $('#screen_always_on').prop('checked', response.screen_always_on);
             if(!response.remote_user && !response.require_local_pass){
                 // Local user and password not required. Hide login button.
                 $('#logout-btn').hide();

@@ -161,10 +161,11 @@ def main():
     GPIO.setup(LCD_D5, GPIO.OUT)
     GPIO.setup(LCD_D6, GPIO.OUT)
     GPIO.setup(LCD_D7, GPIO.OUT)
-    GPIO.setup(LCD_LED, GPIO.OUT)
-    GPIO.output(LCD_LED, 1)
+    GPIO.setup(LCD_LED, GPIO.OUT)    
 
     lcd_init()
+    GPIO.output(LCD_LED, 1)
+    
     external_server_found = False
     while True:        
         msg = "Busy"
@@ -183,7 +184,7 @@ def main():
         lcd_lines[0] = ipAddr
 
         if "FREE" in busy:
-            if (not external_server_found and (time.time() - last_ping_time) > FIRST_PING_TIMEOUT) or
+            if (not external_server_found and (time.time() - last_ping_time) > FIRST_PING_TIMEOUT) or \
                (external_server_found and (time.time() - last_ping_time) > PING_TIMEOUT):
                 tunnel_status = get_tunnel_status()
                 if tunnel_status is not None:
@@ -314,6 +315,5 @@ if __name__ == '__main__':
         pass
     finally:
         lcd_byte(0x01, LCD_CMD)
-        lcd_string("", LCD_LINE_1)
         GPIO.output(LCD_LED, 0)
         GPIO.cleanup()
