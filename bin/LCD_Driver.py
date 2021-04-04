@@ -74,7 +74,7 @@ def get_config():
                 tunnel_subdomain = line.replace("\n", "").split(" ")[1].strip()
                 tunnel_url = "https://{}.loca.lt".format(tunnel_subdomain)
             if "SCREEN_ON" in line:
-                screen_always_on_flag = "Y" in line.replace("\n", "").split(" ")[1].strip()
+                screen_always_on_flag = "y" in line.replace("\n", "").split(" ")[1].strip()
 
 
 # Pings the bnfs server via open tunnel to confirm connectivity

@@ -99,7 +99,7 @@ function chk_update(){
 }
 
 function restart(){    
-    popup_busy("Please wait while rebooting. You will be automatically redirected when the server is available.");
+    popup_busy("<b>Please wait while rebooting.</b><br>You will be automatically redirected when the server is available.");
     window.setInterval(function() { 
         $.ajax({
             url: window.location.protocol + "//" + window.location.host,
@@ -108,13 +108,7 @@ function restart(){
             statusCode: {
                 200: function (response) {
                     window.location.replace('/'); 
-                },
-                400: function (response) {
-                    console.log('Not working!');
-                },
-                0: function (response) {
-                    console.log('Not working!');
-                }              
+                },                            
             }
         });
     }, 5000);
