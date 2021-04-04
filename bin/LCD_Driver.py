@@ -122,16 +122,16 @@ def server_busy():
             response = json.loads(resp.text)
             last_op_timestamp = int(response["last_op_at"])
             last_op_period = int(time.time()) - last_op_timestamp
-            # print("OP AGO:", last_op_period)
+          
+            if screen_always_on_flag or last_op_period < SCREEN_OFF_TIMEOUT:
+                GPIO.output(LCD_LED, 1)
+            else:
+                GPIO.output(LCD_LED, 0)
+                
             if last_op_period < SERVER_BUSY_TIMEOUT:
                 return "BUSY"
-            else:
-                if screen_always_on_flag or last_op_period < SCREEN_OFF_TIMEOUT:
-                    GPIO.output(LCD_LED, 1)
-                else:
-                    GPIO.output(LCD_LED, 0)
                 
-                return "FREE"
+            return "FREE"
         except Exception as pe:
             print("\nERR parsing response:", pe)
             return "ERR"
