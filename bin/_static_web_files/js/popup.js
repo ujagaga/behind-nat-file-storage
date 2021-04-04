@@ -93,12 +93,13 @@ function update_progress(percent){
 } 
 
 function popup_busy(msg){  
-    var htmlmsg = '<div class="popup-busy"><div class="lds-dual-ring"></div>';
+    var htmlmsg = '<div class="popup-busy"><p>';
     if(msg){
-        htmlmsg += '<p>' + msg + '</p>';
+        htmlmsg += msg;
+    }else{
+        htmlmsg += 'Please wait';
     }
-    htmlmsg += '</div>';
-
+    htmlmsg += '</p><div class="loader"></div></div>';
     $('body').append(htmlmsg);
 } 
 

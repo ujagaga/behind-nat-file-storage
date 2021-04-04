@@ -81,7 +81,7 @@ function save_prefs(user, pass){
 }
 
 function chk_update(){ 
-    popup_busy("Checking for update. Please wait.");
+    popup_busy("Checking for updates. Please wait.");
     $.ajax({
         type: "GET",
         url: window.location.protocol + "//" + window.location.host + "/api/chk_update",

@@ -140,4 +140,5 @@ window.onload = function() {
             sendFileData(f.name, new Uint8Array(r.result), 4096);
         };
     };
+
 }
