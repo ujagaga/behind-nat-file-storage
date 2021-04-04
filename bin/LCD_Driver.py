@@ -186,10 +186,12 @@ def main():
         if "FREE" in busy:
             if (not external_server_found and (time.time() - last_ping_time) > FIRST_PING_TIMEOUT) or \
                (external_server_found and (time.time() - last_ping_time) > PING_TIMEOUT):
+                
                 tunnel_status = get_tunnel_status()
                 if tunnel_status is not None:
                     if tunnel_status:
                         lcd_lines[1] = tunnel_url
+                        external_server_found = True
 
         refresh_lcd()
 
