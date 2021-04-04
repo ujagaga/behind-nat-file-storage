@@ -50,6 +50,7 @@ E_PULSE = 0.0005
 E_DELAY = 0.0005
 SERVER_BUSY_TIMEOUT = 10
 SCREEN_OFF_TIMEOUT = 300
+FIRST_PING_TIMEOUT = 8
 PING_TIMEOUT = 60
 tunnel_url = ""
 CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".bnfs", "settings.cfg")
@@ -149,7 +150,7 @@ def server_busy():
 
 
 # Main initialization and infinite loop
-def main():
+def main():   
     get_config()
 
     GPIO.setboard(GPIO.ZERO)
@@ -164,7 +165,7 @@ def main():
     GPIO.output(LCD_LED, 1)
 
     lcd_init()
-    counter = 0
+    external_server_found = False
     while True:        
         msg = "Busy"
         busy = server_busy()
@@ -180,18 +181,17 @@ def main():
 
         ipAddr = get_ip()
         lcd_lines[0] = ipAddr
-        # lcd_string(ipAddr, LCD_LINE_1)
 
         if "FREE" in busy:
-            if (time.time() - last_ping_time) > PING_TIMEOUT:
+            if (not external_server_found and (time.time() - last_ping_time) > FIRST_PING_TIMEOUT) or
+               (external_server_found and (time.time() - last_ping_time) > PING_TIMEOUT):
                 tunnel_status = get_tunnel_status()
                 if tunnel_status is not None:
                     if tunnel_status:
                         lcd_lines[1] = tunnel_url
-                        # lcd_string(tunnel_url, LCD_LINE_2)
 
         refresh_lcd()
-        counter += 1
+
         time.sleep(1)  
 
 

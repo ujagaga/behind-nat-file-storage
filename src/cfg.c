@@ -23,6 +23,7 @@ char admin_user_pass[MAX_USER_DATA_LEN] = {0};
 char admin_user_token[MAX_USER_DATA_LEN] = {0};
 char subdomain[MAX_USER_DATA_LEN] = {0};
 bool require_pass_in_lan = false;
+bool screen_always_on = true;
 
 
 static char* my_strcpy(char* dst, char* src){
@@ -61,7 +62,8 @@ int settings_readSetupFile(void) {
   FILE *fp; 
 
   if ((fp=fopen(CFG_FILE_FULL_PATH, "r")) == NULL) {
-    fprintf(stderr, "Failed to open config file %s\n", CFG_FILE_FULL_PATH);
+    fprintf(stderr, "Failed to open config file %s\nCreating a new one.\n", CFG_FILE_FULL_PATH);
+    settings_writeSetupFile();
     return EXIT_FAILURE;
   }
 
@@ -105,6 +107,17 @@ int settings_readSetupFile(void) {
         require_pass_in_lan = true;
       }else{
         require_pass_in_lan = false;
+      }
+    }
+
+    val = strstr(buf, "SCREEN_ON ");
+    if (val != NULL) {      
+      val += strlen("SCREEN_ON ");
+
+      if(*val == 'y'){
+        screen_always_on = true;
+      }else{
+        screen_always_on = false;
       }
     }
    
@@ -152,9 +165,22 @@ int settings_writeSetupFile(void){
   }
 
   // Write require_pass_in_lan
-  next = my_strcpy(buf, "PASS_IN_LAN ");
-  
+  next = my_strcpy(buf, "PASS_IN_LAN ");  
   if(require_pass_in_lan){
+    next = my_strcpy(next, "y\r\n");    
+  }else{
+    next = my_strcpy(next, "n\r\n");    
+  }  
+  
+  result = fputs( buf, fp );
+  if(result == EOF){
+    fprintf(stderr, "Config write failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  // Write display always on flag
+  next = my_strcpy(buf, "SCREEN_ON ");
+  if(screen_always_on){
     next = my_strcpy(next, "y\r\n");    
   }else{
     next = my_strcpy(next, "n\r\n");    

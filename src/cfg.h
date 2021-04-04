@@ -10,6 +10,7 @@ extern char admin_user_pass[MAX_USER_DATA_LEN];
 extern char admin_user_token[MAX_USER_DATA_LEN];
 extern char subdomain[MAX_USER_DATA_LEN];
 extern bool require_pass_in_lan;
+extern bool screen_always_on;
 extern char* settings_dir;
 
 int settings_readSetupFile(void);

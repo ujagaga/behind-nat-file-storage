@@ -2,6 +2,7 @@ var user_field = document.getElementById('username');
 var new_pass_field = document.getElementById('new_pass');
 var confirm_pass_field = document.getElementById('confirm_pass');
 var req_login_field = document.getElementById('require_login');
+var lcd_on_field = document.getElementById('screen_always_on');
 var subdomain = document.getElementById('subdomain');
 
 function getCookie(cname) {
@@ -35,6 +36,7 @@ function save_prefs(user, pass){
     var new_pass = new_pass_field.value;
     var confirm_pass = confirm_pass_field.value;
     var req_login = req_login_field.checked;
+    var lcd_on = lcd_on_field.checked;
 
     if(user === ""){        
         focus_field(user_field);
@@ -54,6 +56,7 @@ function save_prefs(user, pass){
                 "username": user,    
                 "newpass": new_pass,
                 "reqlogin": req_login,
+                "lcdalwayson": lcd_on,
                 "subdomain": subdomain.value
             },
             cache: false,            

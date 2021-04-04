@@ -31,6 +31,7 @@ static const char* s_ssi_pattern = "#.shtml";
 static const char* HTTP_NEW_USER = "username";
 static const char* HTTP_NEW_PASS = "newpass";
 static const char* HTTP_REQ_LOGIN = "reqlogin";
+static const char* HTTP_LCD_ON = "lcdalwayson";
 static const char* HTTP_SUBDOMAIN = "subdomain";
 static const char* HTTP_DESTINATION = "destination";
 static const char* helper = "/file_ops_helper.py";
@@ -318,6 +319,19 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
             errMsg = "ERROR: Require login flag invalid value!";
           }
 
+          ret = mg_http_get_var(&(hm->message), HTTP_LCD_ON, target, sizeof(target));
+          if(ret == 0){ 
+            retVal = 1;
+            errMsg = "ERROR: Require login flag not found!";
+          }else if(strcmp(target, "true") == 0){
+            screen_always_on = true;
+          }else if(strcmp(target, "false") == 0){
+            screen_always_on = false;
+          }else{
+            retVal = 1;
+            errMsg = "ERROR: Display always on flag invalid value!";
+          }
+
           if(ret != 0){
             ret = mg_http_get_var(&(hm->message), HTTP_SUBDOMAIN, target, sizeof(target));
             if(ret != 0){ 
@@ -407,8 +421,8 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     }else if (mg_http_match_uri(hm, "/api/get_prefs")) {      
 
       mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-      mg_http_printf_chunk(c, "{\"require_local_pass\":%d, \"admin_uname\":\"%s\", \"admin_pass\":\"%s\", \"subdomain\":\"%s\", \"remote_user\":%d}\n", 
-      require_pass_in_lan, admin_user_name, admin_user_pass, subdomain, userIsRemote);  
+      mg_http_printf_chunk(c, "{\"screen_always_on\":%d, \"require_local_pass\":%d,\"admin_uname\":\"%s\", \"admin_pass\":\"%s\", \"subdomain\":\"%s\", \"remote_user\":%d}\n", 
+      screen_always_on, require_pass_in_lan, admin_user_name, admin_user_pass, subdomain, userIsRemote);  
       mg_http_printf_chunk(c, "");
 
     }else if (mg_http_match_uri(hm, "/share/")){
