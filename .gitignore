@@ -3,3 +3,8 @@
 *.cfg
 bnfs
 current_version.info
+src/dir_list_end.h
+src/dir_list_start.h
+src/login.h
+src/logout.h
+src/preferences.h
