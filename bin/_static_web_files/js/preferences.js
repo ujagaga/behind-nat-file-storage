@@ -81,7 +81,7 @@ function save_prefs(user, pass){
 }
 
 function chk_update(){ 
-    popup_busy();
+    popup_busy("Checking for update. Please wait.");
     $.ajax({
         type: "GET",
         url: window.location.protocol + "//" + window.location.host + "/api/chk_update",
@@ -93,6 +93,38 @@ function chk_update(){
         },
         error: function () {
             close_busy();
+            console.log('Lost communication with the server!');
+        }
+    });
+}
+
+function restart(){     
+    $.ajax({
+        type: "GET",
+        url: window.location.protocol + "//" + window.location.host + "/api/restart",
+        data: {},
+        cache: false,
+        success: function (response) {
+            popup_busy("Please wait while rebooting. You will be automatically redirected when the server is available.");
+            window.setInterval(function() { 
+                $.ajax({url: window.location.protocol + "//" + window.location.host,
+                    type: "HEAD",
+                    timeout:4000,
+                    statusCode: {
+                        200: function (response) {
+                            window.location.replace('/'); 
+                        },
+                        400: function (response) {
+                            console.log('Not working!');
+                        },
+                        0: function (response) {
+                            console.log('Not working!');
+                        }              
+                    }
+                });
+            }, 5000); 
+        },
+        error: function () {
             console.log('Lost communication with the server!');
         }
     });

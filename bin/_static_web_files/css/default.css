@@ -390,6 +390,10 @@ td:nth-child(4) {
   animation: lds-dual-ring 1.2s linear infinite;
 }
 
+.popup-busy p{
+    margin-auto;
+}
+
 @keyframes lds-dual-ring {
   0% {
     transform: rotate(0deg);

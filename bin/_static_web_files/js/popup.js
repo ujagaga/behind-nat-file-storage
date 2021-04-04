@@ -92,8 +92,13 @@ function update_progress(percent){
     }
 } 
 
-function popup_busy(){  
-    var htmlmsg = '<div class="popup-busy"><div class="lds-dual-ring"></div></div>';
+function popup_busy(msg){  
+    var htmlmsg = '<div class="popup-busy"><div class="lds-dual-ring"></div>';
+    if(msg){
+        htmlmsg += '<p>' + msg + '</p>';
+    }
+    htmlmsg += '</div>';
+
     $('body').append(htmlmsg);
 } 
 

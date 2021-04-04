@@ -406,7 +406,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     }else if (mg_http_match_uri(hm, "/api/restart")) {      
 
       mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-      mg_http_printf_chunk(c, logout_html);
+      mg_http_printf_chunk(c, "OK\n");
       mg_http_printf_chunk(c, "");
       sync();
       system("/usr/sbin/reboot");
