@@ -40,7 +40,6 @@ static char ext_response[1024] = {0};
 static char listen_port[7] = {0};
 static time_t last_op_at = 0;
 static char current_path[PATH_MAX] = {0};
-static bool restartFlag = false;
 
 
 void gen_random(char *s) {  
@@ -396,15 +395,9 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       mg_http_printf_chunk(c, "");
       gen_random(admin_user_token);  // Change user token
 
-    }else if (mg_http_match_uri(hm, "/api/restart")) {      
-
-      mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-      mg_http_printf_chunk(c, "OK\n");
-      mg_http_printf_chunk(c, "");
+    }else if (mg_http_match_uri(hm, "/api/restart")) { 
       sync();
-      restartFlag = true;
-      // system("/usr/sbin/reboot");
-
+      system("/usr/sbin/reboot");
     }else if (mg_http_match_uri(hm, "/api/chk_update")) {      
       
       check_update();
@@ -451,10 +444,6 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     
   }
   (void) fn_data;
-
-  if(restartFlag){
-    system("/usr/sbin/reboot");
-  }
 }
 
 static void usage(const char *prog) {
