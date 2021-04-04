@@ -270,6 +270,10 @@ td:nth-child(4) {
     border-radius: 5px;
     padding: 1em;
     border: 1px solid #dee2e6;
+    -webkit-box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    -moz-box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    z-index: 113;
 }
 
 #busy-bar{
@@ -298,11 +302,16 @@ td:nth-child(4) {
 }
 
 .center-div{
-    display: block;
-    border: 1px solid red;
-    margin: 0 auto 0 auto;       
+    display: block;    
+    margin: 0 auto;       
     padding: 5px 20px;
-    background-color: rgba(248, 249, 250, 1);
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    -webkit-box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    -moz-box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    z-index: 113;
 }
 
 .center-div button{
@@ -394,11 +403,15 @@ td:nth-child(4) {
 .popup-busy p{
     color: black;
     margin-auto;
+    padding: 1em;
+    display: inline-block;
     background-color: #f8f9fa;
     border-radius: 5px;
-    padding: 1em;
     border: 1px solid #dee2e6;
-    display: inline-block;
+    -webkit-box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    -moz-box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
+    z-index: 113;
 }
 
 @keyframes lds-dual-ring {
