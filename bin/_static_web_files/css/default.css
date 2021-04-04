@@ -300,9 +300,7 @@ td:nth-child(4) {
 .center-div{
     display: block;
     border: 1px solid red;
-    margin: 40vh auto 0 auto;
-    max-width: 400px;
-    max-height: 200px;
+    margin: 0 auto 0 auto;       
     padding: 5px 20px;
     background-color: rgba(248, 249, 250, 1);
 }
@@ -359,8 +357,11 @@ td:nth-child(4) {
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vw;
+    height: 100vh;
     z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .popup-progress progress{
@@ -375,7 +376,7 @@ td:nth-child(4) {
   top:50%;
   left: 50%;
   margin-left: -40px;
-  margin-top: -40px;
+  margin-top: -120px;
 }
 
 .lds-dual-ring:after {
@@ -391,7 +392,13 @@ td:nth-child(4) {
 }
 
 .popup-busy p{
+    color: black;
     margin-auto;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 1em;
+    border: 1px solid #dee2e6;
+    display: inline-block;
 }
 
 @keyframes lds-dual-ring {
