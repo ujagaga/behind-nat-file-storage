@@ -375,7 +375,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
         strncpy(temp, operation.ptr, operation.len);
         if(strstr(temp, "SHARE") == temp){
           // temp starts with "SHARE"
-          mg_http_printf_chunk(c, "SHARE %s/share/", subdomain);  
+          mg_http_printf_chunk(c, "SHARE https://%s.loca.lt/share/", subdomain);  
         }        
       }else{
         printf("\n\t ERR:\n");
