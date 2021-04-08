@@ -16,7 +16,7 @@ import hashlib
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-o', metavar='--operation', help='Operation to perform',
-                    choices=['CUT', 'COPY', 'ARCHIVE', 'SHARE', 'DELETE', 'RENAME'], dest='OP', required=True)
+                    choices=['CUT', 'COPY', 'ARCHIVE', 'SHARE', 'DELETE', 'RENAME', 'NEWDIR'], dest='OP', required=True)
 parser.add_argument('-i', metavar='--items', help='Items for the operation', dest='ITMS', required=True)
 parser.add_argument('-s', metavar='--source', help='Source of items', dest='SRC', required=True)
 parser.add_argument('-d', metavar='--destination', help='Destination of result', dest='DST', required=True)
@@ -58,14 +58,17 @@ def sanitize_args():
         dst = dst[1:]
     dst = os.path.join(root, dst)
 
-    input_items = json.loads(args.ITMS)
-    for in_item in input_items:
-        if in_item.endswith('/'):
-            in_item = in_item[:-1]
-        if in_item.startswith('/'):
-            in_item = in_item[1:]
+    try:
+        input_items = json.loads(args.ITMS)
+        for in_item in input_items:
+            if in_item.endswith('/'):
+                in_item = in_item[:-1]
+            if in_item.startswith('/'):
+                in_item = in_item[1:]
 
-        items.append(in_item)
+            items.append(in_item)
+    except Exception as e:
+        print("ERROR parsing items: {}".format(e))
 
 
 def generate_code(file_path):  
@@ -211,33 +214,45 @@ def share():
     code = generate_code(src_path)
     dst_path = os.path.join(dst_path, code)
 
-    if not os.path.exists(dst_path):
+    if not os.path.islink(dst_path):
         os.symlink(src_path, dst_path)
-    
-    if os.path.isdir(dst_path):
+
+    if os.path.isdir(src_path):
         code += '/'
 
     return code
 
 
+def newdir():
+    dir_path = os.path.join(root, dst)
+    try:
+        os.mkdir(dir_path)
+    except Exception as e:
+        return "Error: {}".format(e)
+    return "OK"
+
+
 sanitize_args()
-if "CUT" in args.OP:
+if args.OP.startswith("CUT"):
     print(move_items())
 
-elif "COPY" in args.OP:
+elif args.OP.startswith("COPY"):
     print(copy_items())
 
-elif "ARCHIVE" in args.OP:
+elif args.OP.startswith("ARCHIVE"):
     print(archive())
 
-elif "DELETE" in args.OP:
+elif args.OP.startswith("DELETE"):
     print(remove())
 
-elif "RENAME" in args.OP:
+elif args.OP.startswith("RENAME"):
     print(rename())
 
 elif args.OP.startswith("SHARE"):
     print(share())
+
+elif args.OP.startswith("NEWDIR"):
+    print(newdir())
 
 else:
     print("Unknown operation: {}".format(args.OP))

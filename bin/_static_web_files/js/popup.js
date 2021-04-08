@@ -18,6 +18,16 @@ function popup_msg(message, busy, autohide){
     }
 }
 
+function popup_newdir(message, old_name){
+    var htmlmsg = '<div class="popup-rename"><div class="center-div">' + '<h2 id="rename_title">' + message + '</h2>' +
+    '<input type="text" id="newname" value="' + old_name + '"><br>' +
+    '<button onclick="remove_rename();">Cancel</button>' +
+    '<button onclick="create_new_dir();">Create</button>' +
+    '</div></div>';
+    $('body').append(htmlmsg);
+    $('.popup-rename').fadeIn("slow");
+}
+
 function popup_rename(message, old_name){
     var htmlmsg = '<div class="popup-rename"><div class="center-div">' + '<h2>' + message + '</h2>' +
     '<input type="text" id="newname" value="' + old_name + '"><br>' +
@@ -29,38 +39,39 @@ function popup_rename(message, old_name){
 }
 
 function remove_rename(){
-    $('.popup-rename').remove();
+    var elements = document.getElementsByClassName('popup-rename');
+
+    while(elements[0]) {
+        elements[0].parentNode.removeChild(elements[0]);
+    }
 }
 
 function close_rename_dialog(){
     $('.popup-rename').fadeOut();
     setTimeout(function() {
-        $('.popup-rename').remove();
+        remove_rename();
     }, 2000);
 }
 
 function popup_shared(message){
-    var htmlmsg = '<div class="popup-shared"><div class="center-div">' +
-    '<p class="close-icon" onclick="close_share_dialog();"><i class="fa fa-times-circle fa-lg"></i></p>' +
-    '<h2>Folder shared via url</h2>' +
-    '<p>has been copied to clipboard.</p>' +
-    '<input type="text" id="shared-url"><br>' +
-    '</div></div>';
+    var htmlmsg = '<div class="popup-shared">' +
+    '<h2>Share url copied to clipboard.</h2>' +
+    '<input type="text" id="shared-url" value="' + message + '">' +
+    '</div>';
     $('body').append(htmlmsg);
     var shared = $('#shared-url');
-    shared.val(message);
     $('.popup-shared').fadeIn("slow");
     shared.focus();
-    shared.select();
+    shared.prop("selected", false);
     document.execCommand('copy');
     shared.prop('disabled', true);
-}
-
-function close_share_dialog(){
-    $('.popup-shared').fadeOut();
-    setTimeout(function() {
-        $('.popup-shared').remove();
-    }, 2000);
+    
+    setTimeout(function() { 
+        $('.popup-shared').fadeOut();
+        setTimeout(function() {
+            $('.popup-shared').remove();
+        }, 2000);
+    }, 4000);  
 }
 
 function popup_description(event, message){

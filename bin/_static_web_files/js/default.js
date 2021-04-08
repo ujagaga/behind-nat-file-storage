@@ -87,6 +87,7 @@ window.onload = function() {
     ro_flag = $('#ro_flag').val();
 
     $('#upload-btn').show();
+    $('#newdir-btn').show();
     if(ro_flag[0] === 'L'){
         // Local user.
         $('#tool-bar').show();
@@ -125,7 +126,7 @@ window.onload = function() {
         }
     }
 
-    chk_cookie();    
+    chk_cookie(); 
 
     // If user selected a file, read it into memory and trigger sendFileData()
     var input = document.getElementById('uploadf');

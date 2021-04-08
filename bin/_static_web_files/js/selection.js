@@ -49,7 +49,8 @@ function count_selected(){
     document.cookie = "operation=;path=/"; 
     document.cookie = "items=;path=/"; 
     $('#paste-btn').hide();
-    get_selected();    
+    get_selected();  
+    blure_none();  
 }
 
 function getCookie(cname) {
@@ -68,6 +69,39 @@ function getCookie(cname) {
     return "";
   }
 
+function blure_selected_items(){   
+    try{ 
+        var items_cookie = JSON.parse(getCookie("items"));
+    }catch(err){
+        var items_cookie = items;
+    }
+
+    var checkBoxes = document.getElementById("flist").getElementsByTagName("INPUT");
+    for (var i = 0; i < checkBoxes.length; i++) {
+        
+        var row = checkBoxes[i].parentNode.parentNode;       
+        var data =  row.cells[1].innerHTML;
+        try{
+            var path = data.split('href="').pop().split('">')[1].split('</a')[0];
+            if(items_cookie.indexOf(path) >= 0){
+                row.style.opacity = '0.3';
+            }else{
+                row.style.opacity = '1';
+            }
+        }catch(e){
+            console.log("ERR: " + e);
+        }
+    }    
+}
+
+function blure_none(){
+    var checkBoxes = document.getElementById("flist").getElementsByTagName("INPUT");
+    for (var i = 0; i < checkBoxes.length; i++) {        
+        var row = checkBoxes[i].parentNode.parentNode;       
+        row.style.opacity = '1';       
+    }
+}
+
 function chk_cookie(){
     
     var items_cookie = getCookie("items");
@@ -84,19 +118,24 @@ function chk_cookie(){
 
         if(operation_cookie.includes("COPY")){            
             $('#paste-btn').show();
+            blure_none();
             
         }else if(operation_cookie.includes("CUT")){
             var source_cookie = getCookie("source");
             if(source_cookie == dir_path){
                 $('#paste-btn').hide();
+                // Check which item is to be cut and adjust opacity
+                blure_selected_items();
             }else{
                 $('#paste-btn').show();
+                blure_none();
             }               
         }
     }
 }
 
 function copy_sel(){
+    blure_none();
     get_selected();    
 
     if(items.length > 0){        
@@ -106,6 +145,7 @@ function copy_sel(){
         document.cookie = "source=" + dir_path + ";path=/";
 
         $('#paste-btn').show();
+        blure_none();
     }else{
         document.cookie = "operation=;path=/"; 
         document.cookie = "items=;path=/"; 
@@ -114,19 +154,13 @@ function copy_sel(){
 
 function cut_sel(){
     get_selected();    
+    $('#paste-btn').hide();
+    blure_selected_items();
 
     if(items.length > 0){
         document.cookie = "operation=CUT;path=/";
         document.cookie = "items=" + JSON.stringify(items) + ";path=/";     
-        document.cookie = "source=" + dir_path + ";path=/";
-        
-        var source_cookie = getCookie("source");
-        if(source_cookie == dir_path){
-            $('#paste-btn').hide();
-        }else{
-            $('#paste-btn').show();
-        }
-         
+        document.cookie = "source=" + dir_path + ";path=/"; 
     }else{
         document.cookie = "operation=;path=/"; 
         document.cookie = "items=;path=/"; 
@@ -134,6 +168,7 @@ function cut_sel(){
 }
 
 function archive_sel(){
+    blure_none();
     get_selected();    
     
     if(items.length > 0){
@@ -149,6 +184,7 @@ function archive_sel(){
 }
 
 function share_sel(){
+    blure_none();
     get_selected();
 
     if(items.length == 1){
@@ -164,6 +200,7 @@ function share_sel(){
 }
 
 function delete_sel(){
+    blure_none();
     get_selected();
 
     if(items.length > 0){
@@ -178,7 +215,27 @@ function delete_sel(){
     }
 }
 
+function newdir(){
+    document.cookie = "operation=NEWDIR;path=/";
+    document.cookie = "items=" + JSON.stringify(items) + ";path=/";
+    document.cookie = "source=" + dir_path + ";path=/";
+    document.cookie = "destination=" + dir_path + ";path=/";
+    popup_newdir("Select folder name", "new_dir");
+}
+
+function create_new_dir(){
+    var newname = $("#newname").val();
+    remove_rename();
+    if(newname.length > 2){
+        document.cookie = "destination=" + newname + ";path=/";        
+        execute_op();
+    }else{
+        popup_newdir("Folder name must be longer than 2 characters.", newname);
+    }
+}
+
 function rename_sel(){
+    blure_none();
     get_selected();
 
     if(items.length > 0){
@@ -195,9 +252,9 @@ function rename_sel(){
 
 function do_rename(){
     var newname = $("#newname").val();
+    remove_rename();
     if(newname.length > 2){
-        document.cookie = "destination=" + newname + ";path=/";
-        close_rename_dialog();
+        document.cookie = "destination=" + newname + ";path=/";        
         execute_op();
     }else{
         popup_rename("New name must be longer than 2 characters.", newname);

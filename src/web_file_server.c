@@ -114,6 +114,7 @@ static void shell_operation(struct mg_str* operation, struct mg_str* source, str
 
   // printf("CMD: %s\n", command);
 
+  ext_response[0] = 0;
   FILE *fp;
   
   /* Open the command for reading. */
