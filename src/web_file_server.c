@@ -397,7 +397,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
     }else if (mg_http_match_uri(hm, "/api/restart")) { 
       sync();
-      system("/usr/sbin/reboot");
+      system("/sbin/reboot");
     }else if (mg_http_match_uri(hm, "/api/chk_update")) {      
       
       check_update();
