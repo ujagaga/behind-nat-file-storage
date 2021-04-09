@@ -224,7 +224,7 @@ def share():
 
 
 def newdir():
-    dir_path = os.path.join(root, dst)
+    dir_path = os.path.join(root, dst, items[0])
     try:
         os.mkdir(dir_path)
     except Exception as e:

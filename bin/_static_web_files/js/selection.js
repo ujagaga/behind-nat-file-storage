@@ -217,7 +217,6 @@ function delete_sel(){
 
 function newdir(){
     document.cookie = "operation=NEWDIR;path=/";
-    document.cookie = "items=" + JSON.stringify(items) + ";path=/";
     document.cookie = "source=" + dir_path + ";path=/";
     document.cookie = "destination=" + dir_path + ";path=/";
     popup_newdir("Select folder name", "new_dir");
@@ -227,7 +226,8 @@ function create_new_dir(){
     var newname = $("#newname").val();
     remove_rename();
     if(newname.length > 2){
-        document.cookie = "destination=" + newname + ";path=/";        
+        items = [newname];
+        document.cookie = "items=" + JSON.stringify(items) + ";path=/";      
         execute_op();
     }else{
         popup_newdir("Folder name must be longer than 2 characters.", newname);
