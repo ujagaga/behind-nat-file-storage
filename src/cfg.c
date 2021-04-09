@@ -48,7 +48,7 @@ static void getCfgFullPath(){
   struct stat st = {0};
 
   if (stat(CFG_FILE_FULL_PATH, &st) == -1) {
-    // SFG dir does not exist. Create it.
+    // CFG dir does not exist. Create it.
       mkdir(CFG_FILE_FULL_PATH, 0700);
   }
 

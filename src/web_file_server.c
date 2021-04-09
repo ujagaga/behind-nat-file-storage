@@ -12,6 +12,7 @@
 #include "login.h"
 #include "logout.h"
 #include "preferences.h"
+#include "file_ops_helper.h"
 
 
 // Path to files like js, css, fonts,... This same path will not be usable in shared user folder, 
@@ -34,9 +35,8 @@ static const char* HTTP_REQ_LOGIN = "reqlogin";
 static const char* HTTP_LCD_ON = "lcdalwayson";
 static const char* HTTP_SUBDOMAIN = "subdomain";
 static const char* HTTP_DESTINATION = "destination";
-static const char* helper = "/file_ops_helper.py";
 static const char* updater = "/../updater.sh";
-static char ext_response[1024] = {0};
+char ext_response[1024] = {0};
 static char listen_port[7] = {0};
 static time_t last_op_at = 0;
 static char current_path[PATH_MAX] = {0};
@@ -96,37 +96,6 @@ static bool get_cookie(struct mg_str* buffer, const char* key, struct mg_str* re
   }
 
   return false;
-}
-
-static void shell_operation(struct mg_str* operation, struct mg_str* source, struct mg_str* destination, struct mg_str* items){
-  
-  char command[MG_PATH_MAX] = {0};
-  char* end = command;
-  end += sprintf(command, "%s", current_path); 
-
-  sprintf(end, "\"%s\" -r \"%s\" -o %.*s -s \"%.*s\" -d \"%.*s\" -i '%.*s'", 
-  helper,
-  s_root_dir, 
-  (int)operation->len, operation->ptr, 
-  (int)source->len, source->ptr, 
-  (int)destination->len, destination->ptr,
-  (int)items->len, items->ptr);
-
-  // printf("CMD: %s\n", command);
-
-  ext_response[0] = 0;
-  FILE *fp;
-  
-  /* Open the command for reading. */
-  fp = popen(command, "r");
-  if (fp == NULL) {
-    sprintf(ext_response, "Unknown error.");  
-  }else{    
-    while (fgets(ext_response, sizeof(ext_response), fp) != NULL){
-      printf("\t %s", ext_response);
-    }
-    pclose(fp);
-  }
 }
 
 static void check_update(){
@@ -370,7 +339,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
       if(get_cookie(v, op_key, &operation) && get_cookie(v, item_key, &items) &&
         get_cookie(v, source_key, &source) && get_cookie(v, destination_key, &destination)){
-        shell_operation(&operation, &source, &destination, &items);
+        FO_run_operation(s_root_dir, &operation, &source, &destination, &items);
 
         char temp[255] = {0};
         strncpy(temp, operation.ptr, operation.len);

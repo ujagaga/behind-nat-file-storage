@@ -11,4 +11,4 @@ echo
 echo
 python3 ./html_source/convert_to_string.py
 mv ./html_source/*.h .
-gcc web_file_server.c mongoose.c cfg.c -g -W -Wall -Wno-unused-function -DMG_DISABLE_DAV_AUTH -DMG_ENABLE_FAKE_DAVLOCK -pthread -Wno-format-truncation -o $TARGET
+gcc web_file_server.c mongoose.c cfg.c file_ops_helper.c -g -W -Wall -Wno-unused-function -DMG_DISABLE_DAV_AUTH -DMG_ENABLE_FAKE_DAVLOCK -pthread -Wno-format-truncation -o $TARGET
