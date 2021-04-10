@@ -718,6 +718,8 @@ void mg_http_creds(struct mg_http_message *, char *user, int, char *pass, int);
 bool mg_http_match_uri(const struct mg_http_message *, const char *glob);
 int mg_http_upload(struct mg_connection *, struct mg_http_message *hm,
                    const char *dir);
+int mg_quick_http_upload(struct mg_connection *c, struct mg_http_message *hm, 
+                        const char *dir, char* success_msg);
 void mg_http_bauth(struct mg_connection *, const char *user, const char *pass);
 
 

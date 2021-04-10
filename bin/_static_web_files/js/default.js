@@ -70,7 +70,7 @@ var sendFileData = function(name, data, chunkSize) {
     var sendChunk = function(offset) {
         var chunk = data.subarray(offset, offset + chunkSize) || '';
         var opts = {method: 'POST', body: chunk};
-        var url = '/upload?destination=' + $('#dirpath').val() + '&offset=' + offset + '&name=' + encodeURIComponent(name);
+        var url = '/chunkupload?destination=' + $('#dirpath').val() + '&offset=' + offset + '&name=' + encodeURIComponent(name);
 
         var percent = Math.round((offset * 100)/data.length);
         update_progress(percent);

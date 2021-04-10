@@ -18,7 +18,7 @@
 // Path to files like js, css, fonts,... This same path will not be usable in shared user folder, 
 // so you might want to use something more random, but make sure you adjust html files accordingly.
 #define STATIC_PATH         "_static_web_files"
-#define FAVICON_PATH        "./"STATIC_PATH
+#define FAVICON_PATH        "/"STATIC_PATH
 #define MIN_USERNAME_LEN    5
 #define MIN_PASS_LEN        5
 #define UNAME_ERR_MSG       "Error: Username too short. Min. 5 characters."
@@ -35,11 +35,13 @@ static const char* HTTP_REQ_LOGIN = "reqlogin";
 static const char* HTTP_LCD_ON = "lcdalwayson";
 static const char* HTTP_SUBDOMAIN = "subdomain";
 static const char* HTTP_DESTINATION = "destination";
+static const char* HTTP_SHARE = "share";
 static const char* updater = "/../updater.sh";
 char ext_response[1024] = {0};
 static char listen_port[7] = {0};
 static time_t last_op_at = 0;
 static char current_path[PATH_MAX] = {0};
+static const char* QUICK_UPLOAD_PATH = "/upload";
 
 
 void gen_random(char *s) {  
@@ -226,10 +228,53 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
         }
 
       }else if (mg_http_match_uri(hm, "/")){
+        if(strncmp("PUT", hm->method.ptr, 3) == 0){
+          // Upload requested. Use with: curl IP:PORT/?name=<file_name> -T <path/to/file>
 
-        mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-        mg_http_printf_chunk(c, login_html);
-        mg_http_printf_chunk(c, "");
+          char destination[MG_PATH_MAX] = {0};
+          strcpy(destination, s_root_dir); 
+          strcat(destination, QUICK_UPLOAD_PATH);
+          struct stat st = {0};
+          if (stat(destination, &st) == -1) {
+              // dir does not exist. Create it.
+              mkdir(destination, 0700);        
+          }
+          char sharerequest[4] = {0};
+          mg_http_get_var(&(hm->message), HTTP_SHARE, sharerequest, sizeof(sharerequest));     
+          if((sharerequest[0] == 0) || (sharerequest[0] == 'y')){
+            // Sharing not specificaly forbidden
+            ext_response[0] = 0;
+            char uploadname[200] = {0};
+            mg_http_get_var(&hm->query, "name", uploadname, sizeof(uploadname));
+
+            if(uploadname[0] != 0){
+              char itemsData[256] = {0};
+              strcat(itemsData, "\"/");
+              strcat(itemsData, uploadname);
+              strcat(itemsData, "\"");
+                        
+              struct mg_str items = {itemsData, strlen(itemsData)};
+
+              char relativepath[MG_PATH_MAX] = {0};
+              snprintf(relativepath, sizeof(relativepath), "%s/%s", QUICK_UPLOAD_PATH, uploadname);
+              struct mg_str src = {relativepath, strlen(relativepath)};
+
+              share(s_root_dir, &src, &items);
+            }    
+
+            char msg[256] = {0};
+            snprintf(msg, sizeof(msg), "\n==========\nhttps://%s.loca.lt/share/%s\n==========\n", subdomain, ext_response);
+            mg_quick_http_upload(c, hm, destination, msg);    
+          }else{
+            mg_quick_http_upload(c, hm, destination, NULL);
+          }        
+
+        }else{
+          // Just serve the (probably get) request
+          mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+          mg_http_printf_chunk(c, login_html);
+          mg_http_printf_chunk(c, "");
+        }
 
       }else if (mg_http_match_uri(hm, "/api/login")) {
         // tried to authorize but failed
@@ -239,10 +284,13 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
         
       }else {
         // All URIs must be authenticated, so login
-        mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-        mg_http_printf_chunk(c, logout_html);
-        mg_http_printf_chunk(c, "");
-
+        if(strncmp("PUT", hm->method.ptr, 3) == 0){
+          mg_http_reply(c, 403, "", "\n==========\nForbidden. Only root upload allowed.\n==========\n");
+        }else{
+          mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+          mg_http_printf_chunk(c, logout_html);
+          mg_http_printf_chunk(c, "");
+        }
       }      
     } else if (mg_http_match_uri(hm, "/api/login")) {
 
@@ -388,7 +436,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
       mg_http_serve_dir(c, ev_data, &opts);
 
-    }else if (mg_http_match_uri(hm, "/upload")){
+    }else if (mg_http_match_uri(hm, "/chunkupload")){
       char destination[MG_PATH_MAX] = {0};
       strcpy(destination, s_root_dir);
       int destLen = strlen(destination);
@@ -397,19 +445,57 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       destLen++;
 
       int ret = mg_http_get_var(&(hm->message), HTTP_DESTINATION, &destination[destLen], sizeof(destination) - destLen);
-      if(ret != 0){
+      if(ret > 0){
         mg_http_upload(c, hm, destination); 
       }
     
     }else{
-      // printf("Authorized. serve!\n");
-      struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
-      mg_http_serve_dir(c, ev_data, &opts);
+      // Authorized. serve!
+      if(strncmp("PUT", hm->method.ptr, 3) == 0){
+        // Upload requested. Use with: curl IP:PORT/<path>?name=<file_name> -T <path/to/file>
+
+        char destination[MG_PATH_MAX] = {0};
+        strcpy(destination, s_root_dir); 
+        strncat(destination, hm->uri.ptr, (int)hm->uri.len);
+        struct stat st = {0};
+        if (stat(destination, &st) == -1) {
+            // dir does not exist. Create it.
+            mkdir(destination, 0700);        
+        }
+        char sharerequest[4] = {0};
+        mg_http_get_var(&(hm->message), HTTP_SHARE, sharerequest, sizeof(sharerequest));     
+        if((sharerequest[0] == 0) || (sharerequest[0] == 'y')){
+          // Sharing not specificaly forbidden
+          ext_response[0] = 0;
+          char uploadname[200] = {0};
+          mg_http_get_var(&hm->query, "name", uploadname, sizeof(uploadname));
+
+          if(uploadname[0] != 0){
+            char itemsData[256] = {0};
+            strcat(itemsData, "\"/");
+            strcat(itemsData, uploadname);
+            strcat(itemsData, "\"");
+                      
+            struct mg_str items = {itemsData, strlen(itemsData)};
+            share(s_root_dir, &hm->uri, &items);
+          }    
+
+          char msg[256] = {0};
+          snprintf(msg, sizeof(msg), "\n==========\nhttps://%s.loca.lt/share/%s\n==========\n", subdomain, ext_response);
+          mg_quick_http_upload(c, hm, destination, msg);    
+        }else{
+          mg_quick_http_upload(c, hm, destination, NULL);
+        }        
+
+      }else{
+        // Just serve the (probably get) request
+        struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
+        mg_http_serve_dir(c, ev_data, &opts);
+      }      
     }   
 
     if(set_timestamp_flag){
       last_op_at = time(NULL);
-//      printf("Setting time %ld for request [%.*s]\r\n", last_op_at, (int) hm->uri.len, hm->uri.ptr);
     }
     
   }

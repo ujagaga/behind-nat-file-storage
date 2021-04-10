@@ -321,7 +321,7 @@ static int archive(const char* root_dir, struct mg_str* source, struct mg_str* i
     return EXIT_SUCCESS;
 }
 
-static int share(const char* root_dir, struct mg_str* source, struct mg_str* items){
+int share(const char* root_dir, struct mg_str* source, struct mg_str* items){
     // get one item
     char item[MG_PATH_MAX] = {0}; 
     int next = getNextJsonArrayItem(items, item, 0);
