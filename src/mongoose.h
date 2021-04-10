@@ -705,6 +705,7 @@ struct mg_connection *mg_http_connect(struct mg_mgr *, const char *url,
                                       mg_event_handler_t fn, void *fn_data);
 void mg_http_serve_dir(struct mg_connection *, struct mg_http_message *hm,
                        struct mg_http_serve_opts *);
+void mg_listshare(struct mg_connection *c, char *dir);
 void mg_http_serve_file(struct mg_connection *, struct mg_http_message *,
                         const char *, const char *mime, const char *headers);
 void mg_http_reply(struct mg_connection *, int status_code, const char *headers,

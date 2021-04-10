@@ -39,10 +39,13 @@ th,td {
     word-break: break-all;    
 }
 
-th{
-    cursor: pointer;
+th{    
     background-color: #d0d5dc;
     border-bottom: 1px solid black;
+}
+
+#flist th{
+    cursor: pointer;
 }
 
 td{
@@ -66,20 +69,28 @@ td input{
 }
 
 tbody tr:nth-child(even) {
-    background-color: rgba(242, 242, 242, 0.2);
+    background-color: rgba(242, 242, 242, 0.4);
 }
 
-td:nth-child(1) {  
+#flist td:nth-child(1) {  
     width: 40px;
 }
 
-td:nth-child(3) {  
+#flist td:nth-child(3) {  
     word-wrap: break-word;
     width: 9em;
 }
 
-td:nth-child(4) {  
+#flist td:nth-child(4) {  
     width: 5em;
+}
+
+#sharelist td:nth-child(1) {  
+    width: 15px;
+}
+
+#sharelist td:nth-child(2) {  
+    width: 260px;
 }
 
 #nav-bar, #tool-bar{
@@ -486,6 +497,10 @@ td:nth-child(4) {
 
     .margin-div label[for=subdomain]{
         width: calc(100% - 14px);
+    }
+
+    #sharelist td:nth-child(2) {  
+        width: 190px;
     }
 
 }

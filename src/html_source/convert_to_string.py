@@ -27,7 +27,12 @@ file_defines = [
         "in": "preferences.html", 
         "out": "preferences.h", 
         "rows": ['#pragma once', 'static const char *preferences_html = ""']
-    }
+    },
+    { 
+        "in": "share_list.html", 
+        "out": "share_list.h", 
+        "rows": ['#pragma once', 'static const char *share_list_html = ""']
+    },
 ]
 
 current_path = os.path.dirname(os.path.realpath(__file__))

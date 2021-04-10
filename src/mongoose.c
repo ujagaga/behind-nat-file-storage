@@ -127,11 +127,6 @@ int mg_base64_decode(const char *src, int n, char *dst) {
 #endif
 
 
-
-
-
-
-
 struct dns_data {
   struct dns_data *next;
   struct mg_connection *c;
@@ -1000,6 +995,32 @@ static void printdirentry(struct mg_connection *c, const char *name,
             n, path, slash, name, slash, mod, size);
 }
 
+static void printsharedirentry(struct mg_connection *c, const char *name,  mg_stat_t *stp, char* root) {
+  char path[MG_PATH_MAX];
+  int is_dir = S_ISDIR(stp->st_mode), n = 0;
+  const char *slash = is_dir ? "/" : "";
+  
+  n = mg_url_encode(name, strlen(name), path, sizeof(path));
+  path[n] = 0;
+  char target_path[MG_PATH_MAX] = {0};
+
+  /* Attempt to read the target of the symbolic link. */
+  char fullpath[MG_PATH_MAX] = {0};
+  strcpy(fullpath, root);
+  strcat(fullpath, path);
+  readlink(fullpath, target_path, sizeof (target_path)); 
+
+  int relativePathStart = 0;
+
+  if(target_path[0] != 0){
+    // targetpath now contains full target path. Need to remove the root path from it's start.
+    relativePathStart = strlen(root) - sizeof("share/");    
+  }
+
+  mg_printf(c,"<tr><td><input type=\"checkbox\"></td><td><a href=\"%s%s\">%s%s</a></td><td>%s</td></tr>\n",
+            &target_path[relativePathStart], slash, name, slash, &target_path[relativePathStart + 1]);
+}
+
 static void listdir(struct mg_connection *c, struct mg_http_message *hm,
                     char *dir) {
   char path[MG_PATH_MAX], *p = &dir[strlen(dir) - 1], tmp[10];
@@ -1033,6 +1054,43 @@ static void listdir(struct mg_connection *c, struct mg_http_message *hm,
     }
     closedir(dirp);
     mg_printf(c, dir_list_html2);
+    n = snprintf(tmp, sizeof(tmp), "%lu", (unsigned long) (c->send.len - off));
+    memcpy(c->send.buf + off - 10, tmp, n);  // Set content length
+  } else {
+    mg_http_reply(c, 400, "", "Cannot open dir");
+    LOG(LL_ERROR, ("%lu opendir(%s) -> %d", c->id, dir, errno));
+  }
+}
+
+void mg_listshare(struct mg_connection *c, char *dir) {
+  char path[MG_PATH_MAX], *p = &dir[strlen(dir) - 1], tmp[10];
+  struct dirent *dp;
+  DIR *dirp;
+
+  while (p > dir && *p != '/') *p-- = '\0';
+  if ((dirp = (opendir(dir))) != NULL) {
+    size_t off, n;
+    mg_printf(c, "%s\r\n",
+              "HTTP/1.1 200 OK\r\n"
+              "Content-Type: text/html; charset=utf-8\r\n"
+              "Content-Length:         \r\n");
+    off = c->send.len;  // Start of body
+
+    while ((dp = readdir(dirp)) != NULL) {
+      mg_stat_t st;
+      const char *sep = dp->d_name[0] == MG_DIRSEP ? "/" : "";
+      // Do not show current dir and hidden files
+      if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..")) continue;
+      // SPIFFS can report "/foo.txt" in the dp->d_name
+      if (snprintf(path, sizeof(path), "%s%s%s", dir, sep, dp->d_name) < 0) {
+        LOG(LL_ERROR, ("%s truncated", dp->d_name));
+      } else if (mg_stat(path, &st) != 0) {
+        LOG(LL_ERROR, ("%lu stat(%s): %d", c->id, path, errno));
+      } else {
+        printsharedirentry(c, dp->d_name, &st, dir);
+      }
+    }
+    closedir(dirp);
     n = snprintf(tmp, sizeof(tmp), "%lu", (unsigned long) (c->send.len - off));
     memcpy(c->send.buf + off - 10, tmp, n);  // Set content length
   } else {
@@ -1111,6 +1169,7 @@ void mg_http_serve_dir(struct mg_connection *c, struct mg_http_message *hm,
     }
   }
 }
+
 #endif
 
 static bool mg_is_url_safe(int c) {

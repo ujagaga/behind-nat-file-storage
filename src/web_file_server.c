@@ -13,6 +13,7 @@
 #include "logout.h"
 #include "preferences.h"
 #include "file_ops_helper.h"
+#include "share_list.h"
 
 
 // Path to files like js, css, fonts,... This same path will not be usable in shared user folder, 
@@ -431,10 +432,20 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       mg_http_printf_chunk(c, "");
 
     }else if (mg_http_match_uri(hm, "/share/")){
-      // We should have a table display here with targets and option to delete.
-      printf("Authorized. Serve SHARE!\n");
-      struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
-      mg_http_serve_dir(c, ev_data, &opts);
+      // char destination[MG_PATH_MAX] = {0};
+      // strcpy(destination, s_root_dir);
+      // strcat(destination, "/share/");
+      // mg_listshare(c, hm, destination);
+
+      mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+      mg_http_printf_chunk(c, "%s", share_list_html);   
+      mg_http_printf_chunk(c, "");
+
+    }else if (mg_http_match_uri(hm, "/api/get_shared")){
+      char destination[MG_PATH_MAX] = {0};
+      strcpy(destination, s_root_dir);
+      strcat(destination, "/share/");
+      mg_listshare(c, destination);
 
     }else if (mg_http_match_uri(hm, "/chunkupload")){
       char destination[MG_PATH_MAX] = {0};
