@@ -58,14 +58,14 @@ function popup_shared(message){
     '<h2>Share url copied to clipboard.</h2>' +
     '<input type="text" id="shared-url" value="' + message + '">' +
     '</div>';
-    $('body').append(htmlmsg);
-    var shared = $('#shared-url');
+    $('body').append(htmlmsg);    
     $('.popup-shared').fadeIn("slow");
-    shared.focus();
-    shared.prop("selected", false);
+    var shared = $('#shared-url');
+    shared.focus();    
+    shared.select();
     document.execCommand('copy');
     shared.prop('disabled', true);
-    
+
     setTimeout(function() { 
         $('.popup-shared').fadeOut();
         setTimeout(function() {
