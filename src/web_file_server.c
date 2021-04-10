@@ -432,7 +432,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
     }else if (mg_http_match_uri(hm, "/share/")){
       // We should have a table display here with targets and option to delete.
-      // printf("Authorized. Serve SHARE!\n");
+      printf("Authorized. Serve SHARE!\n");
       struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
       mg_http_serve_dir(c, ev_data, &opts);
 

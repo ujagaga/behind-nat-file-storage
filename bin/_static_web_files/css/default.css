@@ -118,18 +118,19 @@ td:nth-child(4) {
 }
 
 #nav-bar p{
-    padding: 2px;
     margin: 2px;
     float: left;
+    min-width: 30px;
+    height: 30px;
+    text-align: center;  
 }
 
 #nav-bar a{
-    padding: 0;
-    margin: 2px;
+    padding: 5px 0;    
     display: inline-block;
 }
 
-#logout-btn{
+#nav-bar span{
     position: fixed;
     right: 1em;
     top: 0;
@@ -137,18 +138,12 @@ td:nth-child(4) {
     display: block;
 }
 
-#preferences-btn, #pwr-btn{
-    position: fixed;
-    right: 3.5em;
-    top: 0;
-    cursor: pointer;
+#logout-btn a, #preferences-btn a, #pwr-btn i, #update-btn i, #shared-btn a{
+    width: 100%;
 }
 
-#update-btn{
-    position: fixed;
-    right: 7em;
-    top: 2px;
-    cursor: pointer;
+#pwr-btn i, #update-btn i{
+    padding: 8px 0;
 }
 
 #path{
