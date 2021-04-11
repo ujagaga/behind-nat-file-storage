@@ -29,8 +29,9 @@ function prepend_icon_and_chkbox(){
                 ext = data.innerHTML.split('.').pop().split('<')[0];
             }catch(e){}
             
+            var type_icon = ""; 
             if(path_type.innerHTML.includes("[DIR]")){ 
-                data.innerHTML = "<i class='far fa-folder path-icon'></i>" + data.innerHTML;
+                type_icon = "fa-folder";
 
                 // Remove slash from folder names
                 var name = data.getElementsByTagName('a')[0];
@@ -40,10 +41,10 @@ function prepend_icon_and_chkbox(){
                     document.getElementsByTagName("table")[0].deleteRow(i);
                 }
             }else if(ext === "zip" || ext === "rar" || ext === "tar" || ext === "gz" || ext === "deb"){
-                data.innerHTML = "<i class='far fa-file-archive path-icon'></i>" + data.innerHTML;
-            }
-
+                type_icon = "fa-file-archive"
+            } 
             
+            data.innerHTML = "<i class='far " + type_icon + " type-icon'></i>" + data.innerHTML;
         }    
         
         if(!toBeRemoved){           

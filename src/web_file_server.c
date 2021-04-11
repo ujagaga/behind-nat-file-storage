@@ -260,7 +260,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
               snprintf(relativepath, sizeof(relativepath), "%s/%s", QUICK_UPLOAD_PATH, uploadname);
               struct mg_str src = {relativepath, strlen(relativepath)};
 
-              share(s_root_dir, &src, &items);
+              FO_share(s_root_dir, &src, &items);
             }    
 
             char msg[256] = {0};
@@ -432,16 +432,13 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       mg_http_printf_chunk(c, "");
 
     }else if (mg_http_match_uri(hm, "/share/")){
-      // char destination[MG_PATH_MAX] = {0};
-      // strcpy(destination, s_root_dir);
-      // strcat(destination, "/share/");
-      // mg_listshare(c, hm, destination);
 
       mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
       mg_http_printf_chunk(c, "%s", share_list_html);   
       mg_http_printf_chunk(c, "");
 
     }else if (mg_http_match_uri(hm, "/api/get_shared")){
+      
       char destination[MG_PATH_MAX] = {0};
       strcpy(destination, s_root_dir);
       strcat(destination, "/share/");
@@ -488,7 +485,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
             strcat(itemsData, "\"");
                       
             struct mg_str items = {itemsData, strlen(itemsData)};
-            share(s_root_dir, &hm->uri, &items);
+            FO_share(s_root_dir, &hm->uri, &items);
           }    
 
           char msg[256] = {0};

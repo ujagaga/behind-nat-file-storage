@@ -87,6 +87,26 @@ static bool is_dir(const char *path)
     return S_ISDIR(path_stat.st_mode);
 }
 
+int FO_is_link(const char *link_path){
+    char target_path[256];
+
+    /* Attempt to read the target of the symbolic link. */
+    int len = readlink (link_path, target_path, sizeof (target_path));
+
+    if (len == -1) {
+        if (errno == EINVAL){
+            // Not a link
+            return -1;
+        }else{
+            // Other problem, probably dead link.
+            return 1;
+        }
+    }
+    else {   
+        return 0;
+    }
+}
+
 static bool startsWith(struct mg_str* str, const char* prefix)
 {
     size_t lenpre = strlen(prefix);
@@ -207,7 +227,9 @@ static int delete(const char* root_dir, struct mg_str* source, struct mg_str* it
             strcpy(full_path, src_path);
             strcat(full_path, item);
 
-            if(is_file(full_path)){
+            if(FO_is_link(full_path) >= 0){
+                remove(full_path);
+            }if(is_file(full_path)){
                 remove(full_path);
             }else if(is_dir(full_path)){
                 rm_dir(full_path);
@@ -321,7 +343,7 @@ static int archive(const char* root_dir, struct mg_str* source, struct mg_str* i
     return EXIT_SUCCESS;
 }
 
-int share(const char* root_dir, struct mg_str* source, struct mg_str* items){
+int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items){
     // get one item
     char item[MG_PATH_MAX] = {0}; 
     int next = getNextJsonArrayItem(items, item, 0);
@@ -378,7 +400,7 @@ int FO_run_operation(const char* root_dir, struct mg_str* operation, struct mg_s
     }else if(startsWith(operation, "RENAME")){
         return do_rename(root_dir, source, destination, items);
     }else if(startsWith(operation, "SHARE")){
-        return share(root_dir, source, items);
+        return FO_share(root_dir, source, items);
     }else if(startsWith(operation, "NEWDIR")){        
         return newdir(root_dir, destination, items);
     }else {

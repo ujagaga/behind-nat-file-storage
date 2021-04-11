@@ -52,8 +52,7 @@ td{
     padding: 0.2em 0;
 }
 
-td input{
-    margin: 0 20px 0 0;
+td input{    
     -ms-transform: scale(1.5); /* IE */
     -moz-transform: scale(1.5); /* FF */
     -webkit-transform: scale(1.5); /* Safari and Chrome */
@@ -62,18 +61,14 @@ td input{
     padding: 5px;
 }
 
-.path-icon{    
-    margin-left: -17px;
-    margin-right: 4px;
+.type-icon{
+    margin: 3px;
     color: #183153;
+    width: 1em;
 }
 
 tbody tr:nth-child(even) {
     background-color: rgba(242, 242, 242, 0.4);
-}
-
-#flist td:nth-child(1) {  
-    width: 40px;
 }
 
 #flist td:nth-child(3) {  
@@ -85,12 +80,9 @@ tbody tr:nth-child(even) {
     width: 5em;
 }
 
-#sharelist td:nth-child(1) {  
+td:nth-child(1) {  
     width: 15px;
-}
-
-#sharelist td:nth-child(2) {  
-    width: 260px;
+    padding: 0;
 }
 
 #nav-bar, #tool-bar{
@@ -498,9 +490,4 @@ tbody tr:nth-child(even) {
     .margin-div label[for=subdomain]{
         width: calc(100% - 14px);
     }
-
-    #sharelist td:nth-child(2) {  
-        width: 190px;
-    }
-
 }

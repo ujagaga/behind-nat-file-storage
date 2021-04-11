@@ -1,6 +1,6 @@
 var items = [];
 
-function count_selected(){
+function get_selected(){
     var checkBoxes = document.getElementById("sharelist").getElementsByTagName("INPUT");
     items = [];
     //Loop through the CheckBoxes.
@@ -9,7 +9,7 @@ function count_selected(){
             var row = checkBoxes[i].parentNode.parentNode;       
             var data =  row.cells[1].innerHTML;
             try{
-                var path = data.split('href="').pop().split('">')[1].split('</a')[0];
+                var path = data.split('href="').pop().split('"')[0];           
                 items.push(path);
             }catch(e){
                 console.log("ERR: " + e);
@@ -23,6 +23,70 @@ function count_selected(){
     }   
 }
 
+function sortTableByName() {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("sharelist");
+    switching = true;
+    /*Make a loop that will continue until
+    no switching has been done:*/
+    while (switching) {
+        //start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /*Loop through all table rows (except the
+        first, which contains table headers):*/
+        for (i = 1; i < (rows.length - 1); i++) {
+            //start by saying there should be no switching:
+            shouldSwitch = false;
+            /*Get the two elements you want to compare,
+            one from current row and one from the next:*/
+            x = rows[i].getElementsByTagName("TD");        
+            y = rows[i + 1].getElementsByTagName("TD");
+            //check if the two rows should switch place:            
+            if(!x[1].innerHTML.includes("fa-folder") && y[1].innerHTML.includes("fa-folder")){
+                // x is a file and y is dir
+                shouldSwitch = true;
+                break;
+            }else if(x[1].innerHTML.includes("fa-folder") && !y[1].innerHTML.includes("fa-folder")){
+                // x is a dir and y is file. This should stay as is.
+            }else{
+                if((x[1].getElementsByTagName('a')[0].innerHTML.toLowerCase() > y[1].getElementsByTagName('a')[0].innerHTML.toLowerCase())){
+                    shouldSwitch = true;
+                    break;
+                }
+            }                   
+        }
+        if (shouldSwitch) {
+            /*If a switch has been marked, make the switch
+            and mark that a switch has been done:*/
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+        }
+    }
+}
+
+// Prepend folder icons
+function prepend_icons(){        
+    var tbl_rows = document.getElementsByTagName("table")[0].rows;
+    for (i = tbl_rows.length - 1; i >= 0; i--){
+        try{        
+            var cell = tbl_rows[i].cells[1];
+            var path = cell.getElementsByTagName('a')[0].innerHTML;
+            var type_icon = "";
+
+            if(path.endsWith('/')){
+                type_icon = "fa-folder";
+                // remove slash
+                cell.innerHTML = cell.innerHTML.replace("/", "");
+            }else if(path.endsWith('.zip') || path.endsWith('.tar') || path.endsWith('.gz') || path.endsWith('.deb')){
+                type_icon = "fa-file-archive"
+            }
+
+            cell.innerHTML = "<i class='far " + type_icon + " type-icon'></i>" + cell.innerHTML;
+        }catch{}
+    }
+}
+
 function load_items(){ 
     $.ajax({
         type: "GET",
@@ -33,10 +97,12 @@ function load_items(){
             var tbldata = "<tbody id=\"tb\">" + response + "</tbody>";
             $('#sharelist thead').after(tbldata);
 
+            prepend_icons();   
+            sortTableByName();
             document.querySelector('#sharelist').onclick = function(ev) {
                 if(ev.target.value) {
                     // Checkbox is clicked
-                    count_selected();           
+                    get_selected();
                 }
             }
         },
@@ -74,6 +140,30 @@ function delete_sel(){
         document.cookie = "operation=;path=/";
         document.cookie = "items=;path=/";
     }
+}
+
+function select_all(){    
+
+    var checkBoxes = document.getElementById("sharelist").getElementsByTagName("INPUT");
+    var do_select;
+
+    if(checkBoxes.length == items.length){
+        do_select = false;
+        $('#tool-bar').hide();
+    }else{
+        do_select = true;
+        $('#tool-bar').show();      
+    }
+
+    //Loop through the CheckBoxes.
+    for (var i = 0; i < checkBoxes.length; i++) {
+        checkBoxes[i].checked = do_select;  
+    }
+
+    get_selected();
+
+    document.cookie = "operation=;path=/"; 
+    document.cookie = "items=;path=/"; 
 }
 
 window.onload = function() {    

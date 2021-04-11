@@ -1017,8 +1017,8 @@ static void printsharedirentry(struct mg_connection *c, const char *name,  mg_st
     relativePathStart = strlen(root) - sizeof("share/");    
   }
 
-  mg_printf(c,"<tr><td><input type=\"checkbox\"></td><td><a href=\"%s%s\">%s%s</a></td><td>%s</td></tr>\n",
-            &target_path[relativePathStart], slash, name, slash, &target_path[relativePathStart + 1]);
+  mg_printf(c,"<tr><td><input type=\"checkbox\"></td><td><a href=\"%s\">%s%s</a></td></tr>\n",
+            path, &target_path[relativePathStart + 1], slash);
 }
 
 static void listdir(struct mg_connection *c, struct mg_http_message *hm,
@@ -1085,7 +1085,9 @@ void mg_listshare(struct mg_connection *c, char *dir) {
       if (snprintf(path, sizeof(path), "%s%s%s", dir, sep, dp->d_name) < 0) {
         LOG(LL_ERROR, ("%s truncated", dp->d_name));
       } else if (mg_stat(path, &st) != 0) {
-        LOG(LL_ERROR, ("%lu stat(%s): %d", c->id, path, errno));
+        LOG(LL_ERROR, ("%lu stat(%s): %d. Dead link? Removing.", c->id, path, errno));
+        // Probably a dead link. Remove it.
+        remove(path);
       } else {
         printsharedirentry(c, dp->d_name, &st, dir);
       }
