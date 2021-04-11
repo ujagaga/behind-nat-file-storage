@@ -149,6 +149,10 @@ td:nth-child(1) {
     padding: 8px 0;
 }
 
+#select-all-btn{
+    margin: 2px;
+}
+
 #path{
     overflow:  auto;
     max-width: calc(100% - 130px);

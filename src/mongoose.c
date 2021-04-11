@@ -990,7 +990,7 @@ static void printdirentry(struct mg_connection *c, const char *name,
   strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", localtime(&stp->st_mtime));
   n = mg_url_encode(name, strlen(name), path, sizeof(path));
   mg_printf(c,
-            "  <tr><td><a href=\"%.*s%s\">%s%s</a></td>"
+            "<tr><td><input type=\"checkbox\"></td><td><a href=\"%.*s%s\">%s%s</a></td>"
             "<td>%s</td><td>%s</td></tr>\n",
             n, path, slash, name, slash, mod, size);
 }

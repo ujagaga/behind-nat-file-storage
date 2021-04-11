@@ -17,13 +17,13 @@ function split_path(){
 }
 
 // Prepend folder icons
-function prepend_icon_and_chkbox(){    
+function prepend_icons(){    
     var tbl_rows = document.getElementsByTagName("table")[0].rows;
-    for (i = tbl_rows.length - 1; i >= 0; i--){
+    for (i = tbl_rows.length - 1; i > 0; i--){
         var toBeRemoved = false;
-        var path_type = tbl_rows[i].cells[2];
+        var path_type = tbl_rows[i].cells[3];
         if(path_type){
-            var data = tbl_rows[i].cells[0];
+            var data = tbl_rows[i].cells[1];
             var ext = "";
             try{
                 ext = data.innerHTML.split('.').pop().split('<')[0];
@@ -45,20 +45,7 @@ function prepend_icon_and_chkbox(){
             } 
             
             data.innerHTML = "<i class='far " + type_icon + " type-icon'></i>" + data.innerHTML;
-        }    
-        
-        if(!toBeRemoved){           
-            var selCell = tbl_rows[i].insertCell(0);
-            if((ro_flag[1] === 'A') || ((ro_flag[2] === 'N') && (ro_flag[0] === 'L'))){
-                if(i == 0){
-                    selCell.innerHTML = '<i id="select-all-btn" title="Select/de-select all." onclick="select_all();" class="fa fa-check-square fa-lg"></i>'
-                }else if(i > 0){
-                    var checkbox = document.createElement("INPUT");
-                    checkbox.type = "checkbox";
-                    selCell.appendChild(checkbox);
-                }
-            }
-        }
+        }   
     }
 }
 
@@ -116,7 +103,7 @@ window.onload = function() {
         }        
     }    
     
-    prepend_icon_and_chkbox();
+    prepend_icons();
     
     sortTableByName();
 
