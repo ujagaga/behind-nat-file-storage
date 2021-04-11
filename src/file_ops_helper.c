@@ -73,6 +73,13 @@ static void cp_file(char* full_src, char* dst){
     shell_op(command);
 }
 
+static bool path_exists(const char *path)
+{
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISREG(path_stat.st_mode) || S_ISDIR(path_stat.st_mode);
+}
+
 static bool is_file(const char *path)
 {
     struct stat path_stat;
@@ -248,7 +255,7 @@ static int cutcopy(const char* root_dir, struct mg_str* source, struct mg_str* d
 
     char dst_path[MG_PATH_MAX] = {0};
     strcpy(dst_path, root_dir);
-    strncat(dst_path, destination->ptr, (int)destination->len);  
+    strncat(dst_path, destination->ptr, (int)destination->len);
     
     // Iterate through items
     int next = 0;
@@ -263,18 +270,36 @@ static int cutcopy(const char* root_dir, struct mg_str* source, struct mg_str* d
 
             char full_dst_path[MG_PATH_MAX];
             strcpy(full_dst_path, dst_path);
-            strcat(full_dst_path, item);            
+            strcat(full_dst_path, item); 
+
+            // Check if destination exists
+            char last_target_name[256] = {0};
+            strcpy(last_target_name, item);             
+
+            while(is_dir(full_dst_path) || is_file(full_dst_path)){ 
+                printf("Exists: %s", full_dst_path);
+
+                if(strlen(last_target_name) < 255){
+                    char new_target_name[256] = {0};
+                    strcpy(new_target_name, "2-");
+                    strcat(new_target_name, last_target_name);
+                    strcpy(last_target_name, new_target_name);
+
+                    strcpy(full_dst_path, dst_path);
+                    strcat(full_dst_path, new_target_name);                    
+                    printf("  Selecting new name: %s\n", full_dst_path);  
+                }                              
+            }
             
             if(is_file(full_src_path)){
                 if(keep_original){
-                    cp_file(full_src_path, dst_path);
+                    cp_file(full_src_path, full_dst_path);
                 }else{                    
                     rename(full_src_path, full_dst_path);
-                }
-                
-            }else if(is_dir(full_src_path)){
+                }                
+            }else if(is_dir(full_src_path)){ 
                 if(keep_original){
-                    cp_dir(full_src_path, dst_path);
+                    cp_dir(full_src_path, full_dst_path);
                 }else{                    
                     move_dir(full_src_path, full_dst_path);
                 }                
