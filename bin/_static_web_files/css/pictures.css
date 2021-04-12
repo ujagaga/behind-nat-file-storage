@@ -51,7 +51,7 @@
     width: 120px;
     font-size: 100px;
     color: #d0d5dc;
-    margin: calc(50% - 60px) auto;
+    margin: calc(50vh - 90px) auto;
 }
 
 .selected{
