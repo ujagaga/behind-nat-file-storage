@@ -24,6 +24,8 @@
 #define MIN_PASS_LEN        5
 #define UNAME_ERR_MSG       "Error: Username too short. Min. 5 characters."
 #define PASS_ERR_MSG        "Error: Password too short. Min. 5 characters."
+#define SHARE_CODE_LEN      32
+#define SHARE_URL_LEN       SHARE_CODE_LEN + 5
 
 static const char* STATIC_PATTERN = "/"STATIC_PATH"/#";
 static const char* s_debug_level = "2";
@@ -37,6 +39,7 @@ static const char* HTTP_LCD_ON = "lcdalwayson";
 static const char* HTTP_SUBDOMAIN = "subdomain";
 static const char* HTTP_DESTINATION = "destination";
 static const char* HTTP_SHARE = "share";
+static const char* HTTP_PATH = "path";
 static const char* updater = "/../updater.sh";
 char ext_response[1024] = {0};
 static char listen_port[7] = {0};
@@ -180,53 +183,42 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
       set_timestamp_flag = false;   
 
+    }else if (mg_http_match_uri(hm, "/api/resolve")){
+      char url[2048] = {0}; 
+      char target_path[MG_PATH_MAX] = {0};
+      bool err = false;
+
+      mg_http_get_var(&(hm->message), HTTP_PATH, url, sizeof(url));
+      if(url[0] == 0){ 
+        err = true;        
+      }else{
+        char link_path[MG_PATH_MAX] = {0};
+        strcpy(link_path, s_root_dir);
+        strcat(link_path, url);     
+
+        /* Attempt to read the target of the symbolic link. */
+        int len = readlink (link_path, target_path, sizeof (target_path));
+
+        if (len == -1) {
+            err = true;
+        }  
+      }
+
+      mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+      if(err){
+        mg_http_printf_chunk(c, "ERR\n");
+      }else{
+        mg_http_printf_chunk(c, &target_path[strlen(s_root_dir)]);
+      }          
+      mg_http_printf_chunk(c, "");
+      
     }else if (!u) {
-      if ((mg_http_match_uri(hm, "/share/*") && ((uint)hm->uri.len > sizeof("/share/"))) || mg_http_match_uri(hm, "/share/*/")){
-        // Serve shared content without any credentials. Should disable file ops by setting c->lable[0] to 'R'.
+      if (mg_http_match_uri(hm, "/share/#") && ((uint)hm->uri.len > SHARE_URL_LEN)){
+        // Serve shared content without any credentials, but with no admin features. 
         // printf("Unauthorized. Serve SHARE!\n");
 
         struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
-
-        char t1[MG_PATH_MAX], t2[sizeof(t1)], tmp[sizeof(t1)];
-        t1[0] = t2[0] = '\0';
-        if (realpath(opts.root_dir, t1) == NULL) {
-          LOG(LL_ERROR, ("realpath(%s): %d", opts.root_dir, errno));
-          mg_http_reply(c, 400, "", "Bad web root [%s]\r\n\r\n", opts.root_dir);
-        } else if (!is_dir(t1)) {
-          mg_http_reply(c, 400, "", "Invalid web root [%s]\r\n\r\n", t1);
-        } else {
-          size_t n1 = strlen(t1), n2;
-
-          mg_url_decode(hm->uri.ptr, hm->uri.len, t1 + n1, sizeof(t1) - n1, 0);
-          t1[sizeof(t1) - 1] = '\0';
-
-          n2 = strlen(t1);
-          while (n2 > 0 && t1[n2 - 1] == '/') t1[--n2] = 0;
-
-          if (realpath(t1, t2) == NULL) {
-            LOG(LL_ERROR, ("realpath(%s): %d", t1, errno));
-            mg_http_reply(c, 404, "", "Not found [%.*s]\r\n\r\n", (int) hm->uri.len, hm->uri.ptr);
-            return;
-          }
-
-          if (is_dir(t2)) {
-            mg_http_serve_dir(c, ev_data, &opts); 
-
-          }else{
-            const char* headerPrefix = "Content-Disposition: attachment; filename=\"";
-            char headers[sizeof(headerPrefix) + NAME_MAX + 1] = {0};
-            strcpy(tmp, t2);
-
-            strcpy(headers, headerPrefix);
-            strcat(headers, basename(tmp));
-            strcat(headers, "\"\r\n\r\n");
-            // printf("PATH: %s\n", t2);
-            // printf("HEADERS: %s\n", headers);
-            FILE *fp = mg_fopen(t2, "r");
-            mg_http_serve_file(c, hm, t2, guess_content_type(t2), headers);
-            if (fp != NULL) fclose(fp);
-          }
-        }
+        mg_http_serve_dir(c, ev_data, &opts);        
 
       }else if (mg_http_match_uri(hm, "/")){
         if(strncmp("PUT", hm->method.ptr, 3) == 0){

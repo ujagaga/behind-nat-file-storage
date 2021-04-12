@@ -392,20 +392,32 @@ int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items){
         }        
         chdir(share_dir);
 
-        // Generate link command
-        char command[MG_PATH_MAX] = {0};
-        strcpy(command, "ln -s \"");
-        strcat(command, root_dir);  
-        strncat(command, source->ptr, (int)source->len);
-        strcat(command, item);
-        strcat(command, "\" ");
-        strcat(command, ext_response);     
+        // Prepare full source path
+        char srcPath[MG_PATH_MAX] = {0};
+        strcat(srcPath, root_dir);  
+        strncat(srcPath, source->ptr, (int)source->len);
+        strcat(srcPath, item);
 
-        // Backup the share code
-        strcpy(share_dir, ext_response);
-        shell_op(command);
-        // Restore the share code
-        strcpy(ext_response, share_dir);
+        // Check if the share link already exists
+        if(FO_is_link(ext_response) != 0){
+            // Generate link command
+            char command[MG_PATH_MAX] = {0};
+            strcpy(command, "ln -s \"");
+            strcat(command, srcPath);
+            strcat(command, "\" ");
+            strcat(command, ext_response);     
+
+            // Backup the share code
+            strcpy(share_dir, ext_response);
+            shell_op(command);
+            // Restore the share code
+            strcpy(ext_response, share_dir);
+        }
+
+        // Check if shared item is a folder
+        if(is_dir(srcPath)){
+            strcat(ext_response, "/");
+        }
     }  
 
     return EXIT_SUCCESS;

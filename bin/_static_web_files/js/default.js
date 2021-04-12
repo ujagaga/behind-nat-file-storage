@@ -69,6 +69,33 @@ var sendFileData = function(name, data, chunkSize) {
     sendChunk(0);
   };
 
+function resolve(){ 
+    var url_parts = window.location.pathname.split("/");
+    if(url_parts[0] === ""){
+        url_parts.shift();
+    }
+    if(url_parts[0] == "share"){
+        var path = "/share/" + url_parts[1];
+
+        $.ajax({
+            type: "GET",
+            url: window.location.protocol + "//" + window.location.host + "/api/resolve",
+            data: {
+                "path": path,
+                "dummy":"end"
+            },
+            success: function (response) {
+                if(response.startsWith("/Pictures")){
+                    process_pictures();
+                }
+            },
+            error: function () {
+                console.log('Lost communication with the server!');
+            }
+        });
+    }
+}
+
 window.onload = function() {
     split_path();
 
@@ -80,6 +107,7 @@ window.onload = function() {
         // Local user.
         $('#tool-bar').show();
         $('#preferences-btn').show();
+        $('#shared-btn').show();
         if(ro_flag[2] === 'Y'){
             // Password is required. Aparently logged in since here. Show logout.
             $('#logout-btn').show();
@@ -92,14 +120,20 @@ window.onload = function() {
         if(ro_flag[1] === 'A'){
             // Logged in. Show preferences and logout.
             $('#preferences-btn').show();
+            $('#shared-btn').show();
             $('#logout-btn').show();
             $('#tool-bar').show();
             
         }else{
             // Not logged in. read only access. Hide preferences and logout.            
             $('#preferences-btn').hide();
+            $('#shared-btn').hide();
             $('#logout-btn').hide();
             $('#tool-bar').hide();
+
+            // Hide checkboxes since no operations are allowed
+            $('tr td:nth-child(1)').hide();
+            $('tr th:nth-child(1)').hide();
         }        
     }    
     
@@ -132,6 +166,8 @@ window.onload = function() {
 
     if($('#dirpath').val().startsWith("/Pictures/")){        
         process_pictures();
+    }else{
+        resolve();
     }
 
 }
