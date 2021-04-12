@@ -130,4 +130,8 @@ window.onload = function() {
         };
     };
 
+    if($('#dirpath').val().startsWith("/Pictures/")){        
+        process_pictures();
+    }
+
 }

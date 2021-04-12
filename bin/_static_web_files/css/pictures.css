@@ -1,0 +1,83 @@
+.imgtable{
+    float: right;
+    width: calc(50% - 4em);
+    min-width: 350px;
+    padding: 0;
+}
+
+.imgtable tbody tr{
+    height: 64px;
+}
+
+.imgtable td:nth-child(3), .imgtable th:nth-child(3) {  
+    display: none;
+}
+
+.thumb{
+    width: 64px;
+    height: auto;
+    float: left;
+    border: 1px solid #d0d5dc;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+#preview{
+    width: 50%;
+    max-height: 90vh;
+    min-width: 400px;    
+    float: left;    
+    position: relative;
+    z-index: 1;
+}
+
+#preview img{
+    max-height: 100%;
+    width: calc(100% - 10px);
+    height: auto;
+    float: right;
+    border: 1px solid #d0d5dc;
+    padding: 5px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+#prev-btn-up, #prev-btn-down{
+    font-size: 30px;
+    padding: 0;
+    height: 30px;
+    margin: 2px;    
+    z-index: 2;
+}
+
+#prev-btn-down{
+    position: absolute;
+    top: 0;
+    left: 50px;
+}
+
+#prev-btn-up{
+    position: absolute;
+    top: 0;
+    right: 50px;
+}
+
+#prev-btn-up i, #prev-btn-down i{
+    background-color: white;
+    border-radius: 15px;
+}
+
+.selected{
+    background: #d0d5dc;
+}
+
+@media only screen and (max-width: 800px){
+    .imgtable{
+        float: left;
+        width: 100%; 
+    }
+
+    #preview{
+        width: 100%;        
+    }
+}

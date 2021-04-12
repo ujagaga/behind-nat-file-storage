@@ -101,7 +101,7 @@ td:nth-child(1) {
 
 #tool-bar{
     bottom: 0;
-    background-color: rgb(24,49,83, 0.2);
+    background-color: #d1d6dd;
     min-height: 2em;
     display: none;
 }
@@ -461,7 +461,6 @@ td:nth-child(1) {
     box-shadow: 0 2.5em 0 0;
   }
 }
-
 
 @media only screen and (max-width: 600px) {
     body{       

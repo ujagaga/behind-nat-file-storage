@@ -432,6 +432,13 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       mg_http_printf_chunk(c, "");
 
     }else if (mg_http_match_uri(hm, "/share/")){
+      // static char html_path[PATH_MAX] = {0};
+      // strcpy(html_path, current_path);
+      // strcat(html_path, "/");
+      // strcat(html_path, STATIC_PATH);
+      // strcat(html_path, "/share_list.html");
+      // printf("html_path: %s\n", html_path);
+      // mg_http_serve_file(c, hm, html_path, guess_content_type(html_path), NULL);
 
       mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
       mg_http_printf_chunk(c, "%s", share_list_html);   
