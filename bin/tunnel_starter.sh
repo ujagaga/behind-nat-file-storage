@@ -1,6 +1,20 @@
 #!/bin/bash
 
-CFG_FILE=/root/.bnfs/settings.cfg
+echo "===== Tunnel starter ====="
+if [ "$#" -gt 1 ]
+then
+    CFG_FILE=$2/.bnfs/settings.cfg
+else
+    CFG_FILE=$HOME/.bnfs/settings.cfg
+fi
+
+if test -f "$CFG_FILE"; then
+    echo "Using configuration from $CFG_FILE"
+else
+    echo "$CFG_FILE does not exist."
+    CFG_FILE=/root/.bnfs/settings.cfg
+    echo "Trying $CFG_FILE"
+fi
 
 # Extract subdomain from config file
 subdomain=""

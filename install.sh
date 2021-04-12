@@ -1,6 +1,7 @@
 #!/bin/bash
 
 INSTALL_DIR="/opt/bnfs"
+CFG_LOCATION=/root/.bnfs
 PROJECT_NAME=behind-nat-file-storage
 GIT_URL=https://github.com/ujagaga/$PROJECT_NAME.git
 GIT_BRANCH=master
@@ -130,7 +131,7 @@ if [ "$OK" == "y" ]; then
     echo "[Service]"
     echo Type=simple
     echo RemainAfterExit=yes
-    echo ExecStart=/opt/bnfs/bin/tunnel_starter.sh $PORT
+    echo ExecStart=/opt/bnfs/bin/tunnel_starter.sh $PORT $CFG_LOCATION
     echo
     echo "[Install]"
     echo WantedBy=multi-user.target
