@@ -19,8 +19,14 @@ function setPreview(){
     cell.classList.add("selected");
     try{
         var img = cell.getElementsByTagName('img')[0];
-        $('#preview img').attr('src', img.src);
-    }catch{}    
+        var preview = $('#preview img');
+        preview.attr('src', img.src);                  
+        $('#prev-blank').hide();
+        preview.show();
+    }catch{
+        $('#preview img').hide();
+        $('#prev-blank').show();
+    }    
 }
 
 
@@ -45,20 +51,29 @@ function process_pictures(){
     $("#table-div").addClass("imgtable");
 
     display_thumbnails();
-   
-    $('.thumb').click(function() {
-        if(!$('#preview').length){
-            $('.container').prepend('<div id="preview">'+
-            '<p onclick="previewDown();" id="prev-btn-down"><i class="far fa-arrow-alt-circle-left"></i></p>' +
-            '<p onclick="previewUp();" id="prev-btn-up"><i class="far fa-arrow-alt-circle-right"></i></p>' + 
-            '<img src="#"/>' +            
-            '</div>');
-        }
 
-        $('#preview img').attr('src', $(this).attr('src'));
+    // Add previous and next image preview buttons
+    $('#tool-bar').append('<p id="prev-back-btn" title="Preview previous image" onclick="previewUp();">' +
+                          '<i class="far fa-arrow-alt-circle-left fa-lg"></i></p>' +
+                          '<p id="prev-fwd-btn" title="Preview next image" onclick="previewDown();">' +
+                          '<i class="far fa-arrow-alt-circle-right fa-lg"></i></p>');
+    
+    $('#prev-back-btn').show();
+    $('#prev-fwd-btn').show();
+
+    // Add image preview placeholder
+    if(!$('#preview').length){
+        $('.container').prepend('<div id="preview">' +
+                                '<img src="#"/>' +
+                                '<p id="prev-blank"><i class="far fa-images"></i></p>' +
+                                '</div>');            
+    }
+    $('#preview img').hide();
+    $('#prev-blank').show();
+
+    $('.thumb').click(function() {
         selected = $(this).closest('td').parent()[0].sectionRowIndex;
-        $('.thumb').closest('td').removeClass("selected");
-        $(this).closest('td').addClass("selected");
+        setPreview();
     });    
 }
 

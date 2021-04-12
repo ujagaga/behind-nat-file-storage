@@ -20,7 +20,7 @@ a, a:visited, a:hover, p {
 
 .container{
     margin: 0;
-    padding: 70px 0;
+    padding: 40px 0;
 }
 
 .row:after {
@@ -256,11 +256,6 @@ td:nth-child(1) {
     float: right;
     cursor: help;
     color: #17a2b8;
-}
-
-
-#paste-btn, #archive-btn, #copy-btn, #cut-btn{
-    display: none;
 }
 
 .popup-msg, .popup-shared{

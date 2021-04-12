@@ -1,12 +1,13 @@
-.imgtable{
-    float: right;
-    width: calc(50% - 4em);
-    min-width: 350px;
+.imgtable{      
     padding: 0;
+    width: 300px;   
+    float: left; 
 }
 
-.imgtable tbody tr{
-    height: 64px;
+.imgtable td a{
+    margin: 0;
+    padding: 0;
+    display: inline-block;
 }
 
 .imgtable td:nth-child(3), .imgtable th:nth-child(3) {  
@@ -23,48 +24,34 @@
 }
 
 #preview{
-    width: 50%;
-    max-height: 90vh;
-    min-width: 400px;    
-    float: left;    
+    width: calc(100% - 330px);
+    height: calc(100vh - 70px);       
     position: relative;
-    z-index: 1;
+    z-index: 1;  
+    float: right;
 }
 
-#preview img{
-    max-height: 100%;
-    width: calc(100% - 10px);
-    height: auto;
-    float: right;
+#preview img{ 
     border: 1px solid #d0d5dc;
     padding: 5px;
     border-radius: 5px;
-    margin-left: 10px;
+    display: none;
+    width: calc(100% - 20px);
+    height: calc(100% - 20px); 
+    object-fit: contain;
+    margin-left: 5px;
 }
 
-#prev-btn-up, #prev-btn-down{
-    font-size: 30px;
-    padding: 0;
-    height: 30px;
-    margin: 2px;    
-    z-index: 2;
-}
-
-#prev-btn-down{
-    position: absolute;
-    top: 0;
-    left: 50px;
-}
-
-#prev-btn-up{
-    position: absolute;
-    top: 0;
-    right: 50px;
-}
-
-#prev-btn-up i, #prev-btn-down i{
-    background-color: white;
-    border-radius: 15px;
+#prev-blank{
+    display: none;
+    border: 1px solid #d0d5dc;
+    padding: 5px;
+    border-radius: 5px;
+    height: 120px;
+    width: 120px;
+    font-size: 100px;
+    color: #d0d5dc;
+    margin: calc(50% - 60px) auto;
 }
 
 .selected{
@@ -72,12 +59,12 @@
 }
 
 @media only screen and (max-width: 800px){
-    .imgtable{
-        float: left;
-        width: 100%; 
+    .imgtable{        
+        width: calc(100% - 30px); 
     }
 
     #preview{
-        width: 100%;        
+        width: 100%; 
+        float: left;         
     }
 }
