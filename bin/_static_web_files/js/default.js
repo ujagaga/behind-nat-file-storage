@@ -20,7 +20,6 @@ function split_path(){
 function prepend_icons(){    
     var tbl_rows = document.getElementsByTagName("table")[0].rows;
     for (i = tbl_rows.length - 1; i > 0; i--){
-        var toBeRemoved = false;
         var path_type = tbl_rows[i].cells[3];
         if(path_type){
             var data = tbl_rows[i].cells[1];
@@ -28,23 +27,28 @@ function prepend_icons(){
             try{
                 ext = data.innerHTML.split('.').pop().split('<')[0];
             }catch(e){}
-            
-            var type_icon = ""; 
-            if(path_type.innerHTML.includes("[DIR]")){ 
-                type_icon = "fa-folder";
 
-                // Remove slash from folder names
-                var name = data.getElementsByTagName('a')[0];
-                name.innerHTML = name.innerHTML.replace('/', '');
-                if(name.innerHTML == "share"){
-                    toBeRemoved = true;
-                    document.getElementsByTagName("table")[0].deleteRow(i);
-                }
-            }else if(ext === "zip" || ext === "rar" || ext === "tar" || ext === "gz" || ext === "deb"){
-                type_icon = "fa-file-archive"
-            } 
-            
-            data.innerHTML = "<i class='far " + type_icon + " type-icon'></i>" + data.innerHTML;
+            var hidden = data.innerHTML.split('>')[1].startsWith('.');
+            if(hidden){
+                document.getElementsByTagName("table")[0].deleteRow(i);
+            }else{
+                console.log(data.innerHTML);
+                var type_icon = ""; 
+                if(path_type.innerHTML.includes("[DIR]")){ 
+                    type_icon = "fa-folder";
+
+                    // Remove slash from folder names
+                    var name = data.getElementsByTagName('a')[0];
+                    name.innerHTML = name.innerHTML.replace('/', '');
+                    if(name.innerHTML == "share"){                    
+                        document.getElementsByTagName("table")[0].deleteRow(i);
+                    }
+                }else if(ext === "zip" || ext === "rar" || ext === "tar" || ext === "gz" || ext === "deb"){
+                    type_icon = "fa-file-archive"
+                } 
+                
+                data.innerHTML = "<i class='far " + type_icon + " type-icon'></i>" + data.innerHTML;
+            }
         }   
     }
 }

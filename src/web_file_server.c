@@ -46,7 +46,6 @@ static char listen_port[7] = {0};
 static time_t last_op_at = 0;
 static char current_path[PATH_MAX] = {0};
 static const char* QUICK_UPLOAD_PATH = "/upload/";
-static const char* THUMB_PATH = "/tmp/bnfsthumb/";
 
 
 void gen_random(char *s) {  
@@ -124,55 +123,74 @@ static void check_update(){
   }
 }
 
-static int count_dir_items(char* path){
-  int file_count = 0;
-  DIR * dirp;
-  struct dirent * entry;
-
-  if(FO_is_dir(path)){
-    dirp = opendir(path); 
-    while ((entry = readdir(dirp)) != NULL) {
-        if (entry->d_type == DT_REG) { 
-            file_count++;
-        }
-    }
-    closedir(dirp);
-  } 
-
-  return file_count;
-}
-
-static int create_thumbnail(char* img_path, char* img_name){
+static int create_thumbnail(char* img_path){  
+  // Create thumbs path
   char thumb_path[255] = {0};
-  strcpy(thumb_path, THUMB_PATH);
+  strcpy(thumb_path, img_path);
+  char* img_name = strrchr( thumb_path, '/'); // find the last slash to separate file from path
+  img_name[0] = 0;
 
-  if(count_dir_items(thumb_path) > 1000){
-    FO_rm_dir(thumb_path);
+  char* folderName = strrchr( thumb_path, '/');
+  if(strncmp(folderName, "/.thumbs", sizeof("/.thumbs")) == 0){
+    // Already in thumbnail folder.
+    return EXIT_FAILURE;
   }
 
+  strcat(thumb_path, "/.thumbs/"); 
+  
   struct stat st = {0};
-  if (stat(THUMB_PATH, &st) == -1) {
-      // dir does not exist. Create it.
-      mkdir(THUMB_PATH, 0700);        
+  if (stat(thumb_path, &st) == -1) {
+      // .thumbs dir does not exist. Create it.
+      mkdir(thumb_path, 0700);        
+  }
+  img_name = strrchr( img_path, '/');
+  strcat(thumb_path, ++img_name);  
+
+  bool doCreateThumb = false;
+  // Check if thumb exists
+  if(FO_is_file(thumb_path)){
+    // Exists. Get creation time
+    mg_stat_t st;
+    if(mg_stat(thumb_path, &st) != 0){
+      doCreateThumb = true;
+    }else{
+      long int tct = st.st_ctim.tv_sec;
+
+      // Get source file time
+      if(mg_stat(img_path, &st) != 0){
+        doCreateThumb = true;
+      }else{
+        long int sct = st.st_ctim.tv_sec;
+        if(sct > tct){
+          // Source younger than thumbnail
+          doCreateThumb = true;
+        }
+      }
+    }
+  }else{
+    doCreateThumb = true;
   }
   
-  char command[MG_PATH_MAX] = {};
-  sprintf(command, "vipsthumbnail -s 100 -o %s%s %s", THUMB_PATH, img_name, img_path);
+  if(doCreateThumb){
+    char command[MG_PATH_MAX] = {};
+    sprintf(command, "vipsthumbnail -s 100 -o %s %s", thumb_path, img_path);
 
-  FILE *fp;  
-  /* Open the command for reading. */
-  fp = popen(command, "r");
-  if (fp == NULL) {
-    sprintf(ext_response, "Unknown error.");  
-    return EXIT_FAILURE;
-  }else{    
-    while (fgets(ext_response, sizeof(ext_response), fp) != NULL){
-      printf("\t %s", ext_response);
+    FILE *fp;  
+    /* Open the command for reading. */
+    fp = popen(command, "r");
+    if (fp == NULL) {
+      sprintf(ext_response, "Unknown error.");  
+      return EXIT_FAILURE;
+    }else{    
+      while (fgets(ext_response, sizeof(ext_response), fp) != NULL){
+        printf("\t %s", ext_response);
+      }
+      pclose(fp);
     }
-    pclose(fp);
   }
 
-  sprintf(ext_response, "%s%s", THUMB_PATH, img_name);
+  strcpy(ext_response, thumb_path);
+  
   return EXIT_SUCCESS;
 }
 
@@ -280,14 +298,11 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
           strncat(destination, hm->uri.ptr, (int)hm->uri.len);
 
           if(FO_is_file(destination)){
-            // It is a file. Create thumbnail.
-            char* img_name = strrchr( destination, '/');
-            if(create_thumbnail(destination, ++img_name) == EXIT_SUCCESS){
+            // It is a file. Create thumbnail.            
+            if(create_thumbnail(destination) == EXIT_SUCCESS){
               // Serve the file THUMB_PATH
               mg_http_serve_file(c, hm, ext_response, guess_content_type(ext_response), NULL);
               finished = true;
-            }else{
-              printf("THUMB FAIL: %s\n", ext_response);
             }
           }          
         }
@@ -582,13 +597,10 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
           if(FO_is_file(destination)){
             // It is a file. Create thumbnail.
-            char* img_name = strrchr( destination, '/');
-            if(create_thumbnail(destination, ++img_name) == EXIT_SUCCESS){
+            if(create_thumbnail(destination) == EXIT_SUCCESS){
               // Serve the file THUMB_PATH
               mg_http_serve_file(c, hm, ext_response, guess_content_type(ext_response), NULL);
               finished = true;
-            }else{
-              printf("THUMB FAIL: %s\n", ext_response);
             }
           }          
         }
