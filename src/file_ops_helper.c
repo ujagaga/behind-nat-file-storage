@@ -76,13 +76,15 @@ static void cp_file(char* full_src, char* dst){
 static bool path_exists(const char *path)
 {
     struct stat path_stat;
+    path_stat.st_mode = 0;
     stat(path, &path_stat);
-    return S_ISREG(path_stat.st_mode) || S_ISDIR(path_stat.st_mode);
+    return (path_stat.st_mode > 0);
 }
 
 static bool is_file(const char *path)
 {
     struct stat path_stat;
+    path_stat.st_mode = 0;
     stat(path, &path_stat);
     return S_ISREG(path_stat.st_mode);
 }
@@ -90,6 +92,7 @@ static bool is_file(const char *path)
 static bool is_dir(const char *path)
 {
     struct stat path_stat;
+    path_stat.st_mode = 0;
     stat(path, &path_stat);
     return S_ISDIR(path_stat.st_mode);
 }
@@ -276,7 +279,7 @@ static int cutcopy(const char* root_dir, struct mg_str* source, struct mg_str* d
             char last_target_name[256] = {0};
             strcpy(last_target_name, item);             
 
-            while(is_dir(full_dst_path) || is_file(full_dst_path)){ 
+            while(path_exists(full_dst_path)){ 
                 printf("Exists: %s", full_dst_path);
 
                 if(strlen(last_target_name) < 255){
