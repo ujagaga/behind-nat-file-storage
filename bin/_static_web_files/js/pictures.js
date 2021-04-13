@@ -20,7 +20,7 @@ function setPreview(){
     try{
         var img = cell.getElementsByTagName('img')[0];
         var preview = $('#preview img');
-        preview.attr('src', img.src);                  
+        preview.attr('src', img.src.split('?')[0]);                  
         $('#prev-blank').hide();
         preview.show();
     }catch{

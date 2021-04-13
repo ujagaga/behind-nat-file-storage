@@ -284,7 +284,6 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
             char* img_name = strrchr( destination, '/');
             if(create_thumbnail(destination, ++img_name) == EXIT_SUCCESS){
               // Serve the file THUMB_PATH
-              printf("JUST SERVE: %s\n", ext_response);
               mg_http_serve_file(c, hm, ext_response, guess_content_type(ext_response), NULL);
               finished = true;
             }else{
@@ -586,7 +585,6 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
             char* img_name = strrchr( destination, '/');
             if(create_thumbnail(destination, ++img_name) == EXIT_SUCCESS){
               // Serve the file THUMB_PATH
-              printf("JUST SERVE: %s\n", ext_response);
               mg_http_serve_file(c, hm, ext_response, guess_content_type(ext_response), NULL);
               finished = true;
             }else{
