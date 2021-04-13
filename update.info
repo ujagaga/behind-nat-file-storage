@@ -4,3 +4,4 @@ _static_web_files/
 bin/
 README.md
 updater.sh
+uninstall.sh
