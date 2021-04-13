@@ -2,7 +2,7 @@
 Personal file storage for use without a public IP
 
 ## The Why
-My internet connection is routed so I do not have a unique public IP address and can not access my files from outside local network. The opensource solutions I found online require PHP server, Apache,... so they are not very light weight. I want this to work on a very low end computer (Orange Pi Zero) so I decided to write my own minimalistic file server.
+My internet connection is routed so I do not have a unique public IP address and can not access my files from outside local network. The opensource solutions I found online require PHP server, Apache,... so they are not very light weight. I want this to work on a very low end computer (Orange Pi Zero, Raspberry Pi Zero,...) so I decided to write my own minimalistic file server.
 
 ## Technology
 Mongoose web server is an open source app (https://github.com/cesanta/mongoose) that I used to write my web based file server. It is written in pure C, so it is very fast. Comparing to Python, it is more than 3 times faster than FastApi and about 10 times faster than Flask. 
@@ -27,11 +27,22 @@ Then install localtunnel (npm install -g localtunnel). To open the tunnel execut
 To just do the quick install, run the interactive installer, "install.sh" as root. It will download the repository, build the files, install binaries in "/opt/bnfs" and setup services for automatic startup.
 
 ## Tips
-In the "bin" folder you will find "share_files.sh". I use it to quickly share a specified folder. Usage is described in the script.
-If you share a folder with a "Pictures" directory in it's root, everything in the "Pictures" will be displayed with image preview support, so you can easilly share familly photos.
+1. In the "bin" folder you will find "share_files.sh". I use it to quickly share a specified folder. Usage is described in the script, but basically, just call the script with folder to serve as an argument.
+
+2. If you share a folder with a "Pictures" directory in it's root, everything in the "Pictures" will be displayed with image preview support, so you can easilly share familly photos.
+
+3. bnfs supports uploading files from web browser, but also from terminal:
+curl "<bnfs_ip>:<port>/?name=<file_name_to_use>" -T <path_to_file_to_upload>
+
+The previous command works for unauthorized users in either local network of from outside. The file will be uploaded in the "upload" folder. If you allow local network access without password, if uploading from local network, you can also choose the location:
+curl "<bnfs_ip>:<port>/<path_to_upload_dir>?name=<file_name_to_use>" -T <path_to_file_to_upload>
+
+After an upload, you will get a shareable download link to use to download the file. You can disable sharing if you specify parameter: share=n.
+curl "<bnfs_ip>:<port>/?name=<file_name_to_use>&share=n" -T <path_to_file_to_upload>
 
 ## Current status
-So far it seems all is working fine. If you find a bug, please let me know.
+Sharing a folder works, but sharing a file does not, so curl upload share link does not either. Working on it. 
+If you find another bug, please let me know.
 
 ## Contact
 For any questions, send me a message at ujagaga@gmail.com
