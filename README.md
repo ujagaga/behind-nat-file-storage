@@ -41,7 +41,7 @@ After an upload, you will get a shareable download link to use to download the f
 curl "<bnfs_ip>:<port>/?name=<file_name_to_use>&share=n" -T <path_to_file_to_upload>
 
 ## Current status
-Sharing a folder works, but sharing a file does not, so curl upload share link does not either. Working on it. 
+So far, everything seems to work fine. 
 If you find another bug, please let me know.
 
 ## Contact

@@ -45,7 +45,7 @@ char ext_response[1024] = {0};
 static char listen_port[7] = {0};
 static time_t last_op_at = 0;
 static char current_path[PATH_MAX] = {0};
-static const char* QUICK_UPLOAD_PATH = "/upload";
+static const char* QUICK_UPLOAD_PATH = "/upload/";
 
 
 void gen_random(char *s) {  
@@ -214,19 +214,19 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       
     }else if (!u) {
       if (mg_http_match_uri(hm, "/share/#") && ((uint)hm->uri.len > SHARE_URL_LEN)){
-        // Serve shared content without any credentials, but with no admin features. 
-        // printf("Unauthorized. Serve SHARE!\n");
 
+        // Serve shared content without any credentials, but with no admin features. 
         struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
-        mg_http_serve_dir(c, ev_data, &opts);        
+        mg_http_serve_dir(c, ev_data, &opts);   
 
       }else if (mg_http_match_uri(hm, "/")){
         if(strncmp("PUT", hm->method.ptr, 3) == 0){
           // Upload requested. Use with: curl IP:PORT/?name=<file_name> -T <path/to/file>
-
           char destination[MG_PATH_MAX] = {0};
           strcpy(destination, s_root_dir); 
+          // strncat(destination, hm->uri.ptr, (int)hm->uri.len);
           strcat(destination, QUICK_UPLOAD_PATH);
+          printf("DEST: %s\n", destination);
           struct stat st = {0};
           if (stat(destination, &st) == -1) {
               // dir does not exist. Create it.
@@ -244,15 +244,11 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
               char itemsData[256] = {0};
               strcat(itemsData, "\"/");
               strcat(itemsData, uploadname);
-              strcat(itemsData, "\"");
-                        
+              strcat(itemsData, "\"");                        
+              
               struct mg_str items = {itemsData, strlen(itemsData)};
-
-              char relativepath[MG_PATH_MAX] = {0};
-              snprintf(relativepath, sizeof(relativepath), "%s/%s", QUICK_UPLOAD_PATH, uploadname);
-              struct mg_str src = {relativepath, strlen(relativepath)};
-
-              FO_share(s_root_dir, &src, &items);
+              struct mg_str upload_path = {QUICK_UPLOAD_PATH, strlen(QUICK_UPLOAD_PATH)};
+              FO_share(s_root_dir, &upload_path, &items);
             }    
 
             char msg[256] = {0};
@@ -260,8 +256,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
             mg_quick_http_upload(c, hm, destination, msg);    
           }else{
             mg_quick_http_upload(c, hm, destination, NULL);
-          }        
-
+          } 
         }else{
           // Just serve the (probably get) request
           mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
