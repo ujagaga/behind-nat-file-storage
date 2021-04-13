@@ -201,4 +201,16 @@ else
   logwrite "BNFS not enabled at startup."
 fi
 
+read -r -p "Enable periodic thumbnail cleanup (n/Y)? " OK
+OK=${OK:-n}
+if [ "$OK" == "y" ]; then
+  # Create BNFS service
+  CRON_FILE=/var/spool/cron/crontabs/root
+  echo "0 1 * * * /opt/bnfs/bin/thumbnail_cleanup.py /media/usb0 $SERVE_DIR" > $CRON_FILE
+  chmod 600 $CRON_FILE
+  logwrite "Enabled periodic thumbnail cleaner at 1:00."
+else
+  logwrite "Periodic thumbnail cleaner not enabled."
+fi
+
 echo "Full log is available at:  $INSTALL_DIR/$LOGFILE"
