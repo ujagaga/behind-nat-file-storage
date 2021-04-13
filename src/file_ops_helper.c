@@ -4,10 +4,10 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/reboot.h>
-#include "file_ops_helper.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include "file_ops_helper.h"
 
 
 static void shell_op(char* command)
@@ -48,7 +48,7 @@ static void move_dir(char* src, char* dst){
     shell_op(command);
 }
 
-static void rm_dir(char* src){
+void FO_rm_dir(char* src){
     char command[MG_PATH_MAX * 2] = {0};
     strcpy(command, "rm -rf ");
     strcat(command, src);    
@@ -81,7 +81,7 @@ static bool path_exists(const char *path)
     return (path_stat.st_mode > 0);
 }
 
-static bool is_file(const char *path)
+bool FO_is_file(const char *path)
 {
     struct stat path_stat;
     path_stat.st_mode = 0;
@@ -89,7 +89,7 @@ static bool is_file(const char *path)
     return S_ISREG(path_stat.st_mode);
 }
 
-static bool is_dir(const char *path)
+bool FO_is_dir(const char *path)
 {
     struct stat path_stat;
     path_stat.st_mode = 0;
@@ -239,10 +239,10 @@ static int delete(const char* root_dir, struct mg_str* source, struct mg_str* it
 
             if(FO_is_link(full_path) >= 0){
                 remove(full_path);
-            }if(is_file(full_path)){
+            }if(FO_is_file(full_path)){
                 remove(full_path);
-            }else if(is_dir(full_path)){
-                rm_dir(full_path);
+            }else if(FO_is_dir(full_path)){
+                FO_rm_dir(full_path);
             }
         }
     }while(next > 0);
@@ -294,13 +294,13 @@ static int cutcopy(const char* root_dir, struct mg_str* source, struct mg_str* d
                 }                              
             }
             
-            if(is_file(full_src_path)){
+            if(FO_is_file(full_src_path)){
                 if(keep_original){
                     cp_file(full_src_path, full_dst_path);
                 }else{                    
                     rename(full_src_path, full_dst_path);
                 }                
-            }else if(is_dir(full_src_path)){ 
+            }else if(FO_is_dir(full_src_path)){ 
                 if(keep_original){
                     cp_dir(full_src_path, full_dst_path);
                 }else{                    
@@ -332,9 +332,9 @@ static int do_rename(const char* root_dir, struct mg_str* source, struct mg_str*
 
         // printf("op: RENAME\n    SRC: %s\n    DST: %s\n ITEMS: %.*s\n", src_path, dst_path, (int)items->len, items->ptr);
        
-        if(is_file(src_path)){            
+        if(FO_is_file(src_path)){            
             rename(src_path, dst_path);
-        }else if(is_dir(src_path)){
+        }else if(FO_is_dir(src_path)){
             move_dir(src_path, dst_path);               
         }
     }
@@ -418,7 +418,7 @@ int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items){
         }
 
         // Check if shared item is a folder
-        if(is_dir(srcPath)){
+        if(FO_is_dir(srcPath)){
             strcat(ext_response, "/");
         }
     }  

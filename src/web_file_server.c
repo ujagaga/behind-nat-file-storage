@@ -46,6 +46,7 @@ static char listen_port[7] = {0};
 static time_t last_op_at = 0;
 static char current_path[PATH_MAX] = {0};
 static const char* QUICK_UPLOAD_PATH = "/upload/";
+static const char* THUMB_PATH = "/tmp/bnfsthumb/";
 
 
 void gen_random(char *s) {  
@@ -121,6 +122,58 @@ static void check_update(){
     }
     pclose(fp);
   }
+}
+
+static int count_dir_items(char* path){
+  int file_count = 0;
+  DIR * dirp;
+  struct dirent * entry;
+
+  if(FO_is_dir(path)){
+    dirp = opendir(path); 
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_type == DT_REG) { 
+            file_count++;
+        }
+    }
+    closedir(dirp);
+  } 
+
+  return file_count;
+}
+
+static int create_thumbnail(char* img_path, char* img_name){
+  char thumb_path[255] = {0};
+  strcpy(thumb_path, THUMB_PATH);
+
+  if(count_dir_items(thumb_path) > 1000){
+    FO_rm_dir(thumb_path);
+  }
+
+  struct stat st = {0};
+  if (stat(THUMB_PATH, &st) == -1) {
+      // dir does not exist. Create it.
+      mkdir(THUMB_PATH, 0700);        
+  }
+  
+  char command[MG_PATH_MAX] = {};
+  sprintf(command, "vipsthumbnail -s 100 -o %s%s %s", THUMB_PATH, img_name, img_path);
+
+  FILE *fp;  
+  /* Open the command for reading. */
+  fp = popen(command, "r");
+  if (fp == NULL) {
+    sprintf(ext_response, "Unknown error.");  
+    return EXIT_FAILURE;
+  }else{    
+    while (fgets(ext_response, sizeof(ext_response), fp) != NULL){
+      printf("\t %s", ext_response);
+    }
+    pclose(fp);
+  }
+
+  sprintf(ext_response, "%s%s", THUMB_PATH, img_name);
+  return EXIT_SUCCESS;
 }
 
 bool is_dir(const char *path) {
@@ -216,8 +269,35 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       if (mg_http_match_uri(hm, "/share/#") && ((uint)hm->uri.len > SHARE_URL_LEN)){
 
         // Serve shared content without any credentials, but with no admin features. 
-        struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
-        mg_http_serve_dir(c, ev_data, &opts);   
+        char thumb[8] = {0};
+        mg_http_get_var(&hm->query, "thumb", thumb, sizeof(thumb) - 1);
+
+        bool finished = false;
+        if(thumb[0] != 0){
+          // Thumbnail requested. Check if target is file.
+          char destination[MG_PATH_MAX] = {0};
+          strcpy(destination, s_root_dir); 
+          strncat(destination, hm->uri.ptr, (int)hm->uri.len);
+
+          if(FO_is_file(destination)){
+            // It is a file. Create thumbnail.
+            char* img_name = strrchr( destination, '/');
+            if(create_thumbnail(destination, ++img_name) == EXIT_SUCCESS){
+              // Serve the file THUMB_PATH
+              printf("JUST SERVE: %s\n", ext_response);
+              mg_http_serve_file(c, hm, ext_response, guess_content_type(ext_response), NULL);
+              finished = true;
+            }else{
+              printf("THUMB FAIL: %s\n", ext_response);
+            }
+          }          
+        }
+
+        // printf("JUST SERVE: %s\n", thumb);
+        if(!finished){
+          struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
+          mg_http_serve_dir(c, ev_data, &opts);
+        }
 
       }else if (mg_http_match_uri(hm, "/")){
         if(strncmp("PUT", hm->method.ptr, 3) == 0){
@@ -491,8 +571,35 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
       }else{
         // Just serve the (probably get) request
-        struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
-        mg_http_serve_dir(c, ev_data, &opts);
+        char thumb[8] = {0};
+        mg_http_get_var(&hm->query, "thumb", thumb, sizeof(thumb) - 1);
+
+        bool finished = false;
+        if(thumb[0] != 0){
+          // Thumbnail requested. Check if target is file.
+          char destination[MG_PATH_MAX] = {0};
+          strcpy(destination, s_root_dir); 
+          strncat(destination, hm->uri.ptr, (int)hm->uri.len);
+
+          if(FO_is_file(destination)){
+            // It is a file. Create thumbnail.
+            char* img_name = strrchr( destination, '/');
+            if(create_thumbnail(destination, ++img_name) == EXIT_SUCCESS){
+              // Serve the file THUMB_PATH
+              printf("JUST SERVE: %s\n", ext_response);
+              mg_http_serve_file(c, hm, ext_response, guess_content_type(ext_response), NULL);
+              finished = true;
+            }else{
+              printf("THUMB FAIL: %s\n", ext_response);
+            }
+          }          
+        }
+
+        // printf("JUST SERVE: %s\n", thumb);
+        if(!finished){
+          struct mg_http_serve_opts opts = {s_root_dir, s_ssi_pattern};
+          mg_http_serve_dir(c, ev_data, &opts);
+        }        
       }      
     }   
 

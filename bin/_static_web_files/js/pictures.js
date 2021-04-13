@@ -7,7 +7,7 @@ function display_thumbnails(){
         var path = cell.getElementsByTagName('a')[0].innerHTML;
         
         if(path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png") || path.endsWith(".gif")){
-            cell.innerHTML = "<img class='thumb' src='" + path + "'>" + cell.innerHTML;
+            cell.innerHTML = "<img class='thumb' src='" + path + "?thumb=y'>" + cell.innerHTML;
         }
     }
 }
