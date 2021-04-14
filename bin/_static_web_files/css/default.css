@@ -263,6 +263,21 @@ td:nth-child(1) {
     color: #17a2b8;
 }
 
+.popup-rename{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(248, 249, 250, 0.7);
+    padding-top: calc(50vh - 100px);
+    width: 100vw;
+    height: 100vh;
+}
+
+.popup-rename .center-div{
+    width: calc(100vw - 100px);
+}
+
 .popup-msg, .popup-shared{
     display: none;
     position: fixed;
@@ -296,16 +311,7 @@ td:nth-child(1) {
     width: 0;
 }
 
-.popup-rename, .popup-share{
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: rgba(248, 249, 250, 0.5);
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-}
+
 
 @keyframes load {
     0% { width: 0; }

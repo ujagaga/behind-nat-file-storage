@@ -26,6 +26,7 @@ function popup_newdir(message, old_name){
     '</div></div>';
     $('body').append(htmlmsg);
     $('.popup-rename').fadeIn("slow");
+    $('#newname').focus();
 }
 
 function popup_rename(message, old_name){
@@ -36,6 +37,7 @@ function popup_rename(message, old_name){
     '</div></div>';
     $('body').append(htmlmsg);
     $('.popup-rename').fadeIn("slow");
+    $('#newname').focus();
 }
 
 function remove_rename(){
