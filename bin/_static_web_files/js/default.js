@@ -1,4 +1,5 @@
 var ro_flag;
+var showHidden = false;
 
 // Split path and set links for navigation
 function split_path(){    
@@ -29,10 +30,9 @@ function prepend_icons(){
             }catch(e){}
 
             var hidden = data.innerHTML.split('>')[1].startsWith('.');
-            if(hidden){
+            if(hidden && (showHidden == 'n')){
                 document.getElementsByTagName("table")[0].deleteRow(i);
             }else{
-                console.log(data.innerHTML);
                 var type_icon = ""; 
                 if(path_type.innerHTML.includes("[DIR]")){ 
                     type_icon = "fa-folder";
@@ -55,6 +55,15 @@ function prepend_icons(){
 
 function browseForFile(){
     $('#uploadf').click();
+}
+
+function show_hidden(){
+    if(showHidden === 'y'){
+        document.cookie = "showhidden=n;path=/";
+    }else{
+        document.cookie = "showhidden=y;path=/";
+    }
+    location.reload();
 }
 
 // Send a large blob of data chunk by chunk
@@ -102,6 +111,15 @@ function resolve(){
 
 window.onload = function() {
     split_path();
+
+    showHidden = getCookie("showhidden");
+    if(showHidden === 'y'){
+        $('#hidden-show-btn').hide();
+        $('#hidden-hide-btn').show();
+    }else{
+        $('#hidden-hide-btn').hide();
+        $('#hidden-show-btn').show();        
+    }
 
     ro_flag = $('#ro_flag').val();
 

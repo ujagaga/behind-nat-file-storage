@@ -145,6 +145,11 @@ td:nth-child(1) {
     width: 100%;
 }
 
+#hidden-show-btn, #hidden-hide-btn{
+    display: none;
+    padding-top: 6px
+}
+
 #pwr-btn i, #update-btn i{
     padding: 8px 0;
 }
