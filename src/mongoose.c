@@ -1211,12 +1211,14 @@ void mg_http_creds(struct mg_http_message *hm, char *user, int userlen,
     snprintf(pass, passlen, "%.*s", (int) v->len - 7, v->ptr + 7);
   } else if ((v = mg_http_get_header(hm, "Cookie")) != NULL) {
     size_t i;
-    for (i = 0; i < v->len - 13; i++) {
-      if (memcmp(&v->ptr[i], "access_token=", 13) == 0) {
-        const char *p2 = v->ptr + i + 13, *p3 = p2;
-        while (p2 < &v->ptr[v->len] && p2[0] != ';' && p2[0] != ' ') p2++;
-        snprintf(pass, passlen, "%.*s", (int) (p2 - p3), p3);
-        break;
+    if(v->len > 13){
+      for (i = 0; i < v->len - 13; i++) {
+        if (memcmp(&v->ptr[i], "access_token=", 13) == 0) {         
+          const char *p2 = v->ptr + i + 13, *p3 = p2;
+          while (p2 < &v->ptr[v->len] && p2[0] != ';' && p2[0] != ' ') p2++;
+          snprintf(pass, passlen, "%.*s", (int) (p2 - p3), p3);
+          break;
+        }
       }
     }
   } else {

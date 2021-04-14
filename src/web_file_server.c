@@ -59,12 +59,11 @@ void gen_random(char *s) {
 }
 
 // Parse HTTP requests, return true if authorized, false otherwise
-static bool check_authorized(struct mg_http_message *hm) {
-  
-  char user[256], pass[256];
-
+static bool check_authorized(struct mg_http_message *hm) {  
+  char user[256] = {0};
+  char pass[256] = {0};
+    
   mg_http_creds(hm, user, sizeof(user), pass, sizeof(pass));
-
   if (user[0] != '\0' && pass[0] != '\0') {    
     // Both user and password is set, search by user/password    
     if (strcmp(user, admin_user_name) == 0 && strcmp(pass, admin_user_pass) == 0) {  
@@ -200,8 +199,7 @@ bool is_dir(const char *path) {
 }
 
 static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
-  if (ev == MG_EV_HTTP_MSG) {
-    
+  if (ev == MG_EV_HTTP_MSG) {    
     struct mg_http_message *hm = (struct mg_http_message *) ev_data;        
     struct mg_str *clientIP = mg_http_get_header(hm, "X-Forwarded-For");
 
@@ -213,6 +211,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       // printf("Request from local user\n");
       c->label[0] = 'L';
     }    
+   
 
     bool u = check_authorized(hm);
     if(u){
@@ -220,7 +219,6 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     }else{
       c->label[1] = 'U';
     }
-
     u = u || (!userIsRemote && !require_pass_in_lan);
 
     if(require_pass_in_lan){
@@ -229,7 +227,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
       c->label[2] = 'N';
     }
 
-    bool set_timestamp_flag = true;
+    bool set_timestamp_flag = true;    
 
     if (mg_http_match_uri(hm, STATIC_PATTERN)) {
       // Requesting a static file. This is open to all.
@@ -716,7 +714,7 @@ int main(int argc, char *argv[]) {
   }  
 
   // Start infinite event loop
-  printf("Starting Behind NAT File Server, based on Mongoose v%s.\nServing: %s\n", MG_VERSION, s_root_dir);
+  printf("Starting Behind NAT File Server\nServing: %s\n", s_root_dir);
   for (;;) mg_mgr_poll(&mgr, 1000);
   mg_mgr_free(&mgr);
   return 0;
