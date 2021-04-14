@@ -38,6 +38,32 @@ function login(user, pass){
     });
 }
 
+function get_external_url(){
+    $.ajax({
+        type: "GET",
+        url: window.location.protocol + "//" + window.location.host + "/api/status",
+        dataType: 'json',
+        data: {},
+        cache: false,            
+        success: function (response) {    
+            var url = response.subdomain + ".loca.lt";
+            var link = $("<a />", {
+                href : url,
+                text : url
+            });
+            var tips = "<div class='bottom-row'><hr><h2>Tips:</h2>" +
+            "<p>External access url: <b><a href='https://" + url + "'>https://" + url + "</a></b></p>" +
+            '<p>Upload from therminal: <b>curl "' + url + '/?name=&lt;file_name&gt;" -T &lt;path_to_file&gt;</b></p>' +
+            '</div>';
+            $('body').append(tips);  
+            
+        },
+        error: function () {
+            console.log('Lost communication with the server!');            
+        }
+    });
+}
+
 user_field.addEventListener("keyup", function(event) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.keyCode === 13) {
@@ -61,3 +87,7 @@ window.addEventListener("keyup", function(event) {
       login();
     }
 });
+
+window.onload = function() {
+    get_external_url();
+}

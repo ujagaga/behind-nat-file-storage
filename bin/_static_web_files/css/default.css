@@ -192,7 +192,7 @@ td:nth-child(1) {
 }
 
 #login-div, #preferences-div{
-    width: 100vw;
+    width: calc(100vw - 22px);
     max-width: 400px;
     margin: 3rem auto;   
     padding: 10px; 
@@ -398,6 +398,10 @@ td:nth-child(1) {
     -moz-box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
     box-shadow: 10px 10px 24px -3px rgba(0,0,0,0.75);
     z-index: 113;
+}
+
+.bottom-row{
+    width: 100%;   
 }
 
 

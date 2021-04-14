@@ -247,7 +247,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     }else if (mg_http_match_uri(hm, "/api/status")) {      
 
       mg_printf(c, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-      mg_http_printf_chunk(c, "{\"last_op_at\":\"%ld\"}\n", last_op_at);
+      mg_http_printf_chunk(c, "{\"last_op_at\":\"%ld\", \"subdomain\":\"%s\"}\n", last_op_at, subdomain);
       mg_http_printf_chunk(c, "");   
 
       set_timestamp_flag = false;   

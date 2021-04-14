@@ -1,5 +1,5 @@
 var ro_flag;
-var showHidden = false;
+var showHidden = 'n';
 
 // Split path and set links for navigation
 function split_path(){    
@@ -117,6 +117,7 @@ window.onload = function() {
         $('#hidden-show-btn').hide();
         $('#hidden-hide-btn').show();
     }else{
+        showHidden = 'n'
         $('#hidden-hide-btn').hide();
         $('#hidden-show-btn').show();        
     }
