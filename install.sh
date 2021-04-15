@@ -127,10 +127,14 @@ if [ "$OK" == "y" ]; then
   {
     echo "[Unit]"
     echo Description=External access tunnel
+    echo After=network-online.target
+    echo Wants=network-online.target
     echo
     echo "[Service]"
     echo Type=simple
     echo RemainAfterExit=yes
+    echo Restart=on-failure
+    echo RestartSec=10s
     echo ExecStart=/opt/bnfs/bin/tunnel_starter.sh $PORT $CFG_LOCATION
     echo
     echo "[Install]"
