@@ -1011,14 +1011,13 @@ static void printsharedirentry(struct mg_connection *c, const char *name,  mg_st
   readlink(fullpath, target_path, sizeof (target_path)); 
 
   int relativePathStart = 0;
-
   if(target_path[0] != 0){
     // targetpath now contains full target path. Need to remove the root path from it's start.
     relativePathStart = strlen(root) - sizeof("share/");    
   }
 
-  mg_printf(c,"<tr><td><input type=\"checkbox\"></td><td><a href=\"%s\">%s%s</a></td></tr>\n",
-            path, &target_path[relativePathStart + 1], slash);
+  mg_printf(c,"<tr><td><input type=\"checkbox\"></td><td><a href=\"%s%s\">%s%s</a></td></tr>\n",
+            path, slash, &target_path[relativePathStart + 1], slash);
 }
 
 static void listdir(struct mg_connection *c, struct mg_http_message *hm,

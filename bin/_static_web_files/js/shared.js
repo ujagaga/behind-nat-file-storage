@@ -77,7 +77,8 @@ function prepend_icons(){
             if(path.endsWith('/')){
                 type_icon = "fa-folder";
                 // remove slash
-                cell.innerHTML = cell.innerHTML.replace("/", "");
+                newpath = path.replace("/", "");
+                cell.innerHTML = cell.innerHTML.replace(path, newpath);
             }else if(path.endsWith('.zip') || path.endsWith('.tar') || path.endsWith('.gz') || path.endsWith('.deb')){
                 type_icon = "fa-file-archive"
             }
