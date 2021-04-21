@@ -8,7 +8,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
 #define MAX_BUF_LEN     1024
 
 const char* SETTINGS_FILE = "settings.cfg";
@@ -54,6 +53,29 @@ static void getCfgFullPath(){
 
   strcat(CFG_FILE_FULL_PATH, "/");
   strcat(CFG_FILE_FULL_PATH, SETTINGS_FILE); 
+}
+
+void settings_getShareDirPath(char* result){
+  
+  pw = getpwuid(getuid());
+
+  strcpy(result, pw->pw_dir);
+  strcat(result, "/");
+  strcat(result, settings_dir);
+
+  struct stat st = {0};
+  if (stat(result, &st) == -1) {
+    // CFG dir does not exist. Create it.
+      mkdir(result, 0700);
+  }
+
+  /* Prepare remote share dir in settings (ext4) to mount on 
+     local share dir inside root (fat32, ntfs, ...) to suuport links */
+  strcat(result, "/share");
+  if (stat(result, &st) == -1) {
+    // Share dir does not exist. Create it.
+      mkdir(result, 0700);
+  }
 }
 
 int settings_readSetupFile(void) {

@@ -15,4 +15,4 @@ extern char* settings_dir;
 
 int settings_readSetupFile(void);
 int settings_writeSetupFile(void);
-
+void settings_getShareDirPath(char* result);

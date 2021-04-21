@@ -702,6 +702,24 @@ int main(int argc, char *argv[]) {
     }
   } 
 
+  // Prepare remote share dir
+  char remoteShareDir[MG_PATH_MAX] = {0};
+  settings_getShareDirPath(remoteShareDir);
+
+  // Prepare local share dir
+  char localShareDir[MG_PATH_MAX] = {0};
+  sprintf(localShareDir, "%s/share", s_root_dir);
+  struct stat st = {0};
+  if (stat(localShareDir, &st) == -1) {
+    // CFG dir does not exist. Create it.
+      mkdir(localShareDir, 0700);
+  }  
+
+  // Mount remote to local
+  char mountCmd[MG_PATH_MAX] = {0};
+  snprintf(mountCmd, sizeof(mountCmd), "mount --bind %s %s", remoteShareDir, localShareDir);
+  FO_shell_op(mountCmd);
+
   // Generate a random admin token to prevent no token access
   gen_random(admin_user_token); 
 

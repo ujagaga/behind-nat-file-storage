@@ -11,3 +11,4 @@ bool FO_is_file(const char *path);
 bool FO_is_dir(const char *path);
 int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items);
 void FO_rm_dir(char* src);
+void FO_shell_op(char* command);

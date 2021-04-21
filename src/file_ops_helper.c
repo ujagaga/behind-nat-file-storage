@@ -8,9 +8,10 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include "file_ops_helper.h"
+#include "cfg.h"
 
 
-static void shell_op(char* command)
+void FO_shell_op(char* command)
 {
     FILE *fp;
   
@@ -32,7 +33,7 @@ static void generate_code(char* filepath)
     strcpy(command, "echo -n ");
     strcat(command, filepath);
     strcat(command, " |md5sum");
-    shell_op(command);
+    FO_shell_op(command);
     char* blank = strchr(ext_response, ' ');
     if(blank != NULL){
         blank[0] = 0;
@@ -45,14 +46,24 @@ static void move_dir(char* src, char* dst){
     strcat(command, src);
     strcat(command, " ");
     strcat(command, dst);
-    shell_op(command);
+    FO_shell_op(command);
 }
 
 void FO_rm_dir(char* src){
     char command[MG_PATH_MAX * 2] = {0};
     strcpy(command, "rm -rf ");
     strcat(command, src);    
-    shell_op(command);
+    FO_shell_op(command);
+}
+
+static void delete_file(char* path){
+    char source[MG_PATH_MAX];
+    strcpy(source, path);
+    int last = strlen(source) - 1;
+    if(source[last] == '/'){
+        source[last] = 0;
+    }
+    remove(source);
 }
 
 static void cp_dir(char* full_src, char* dst){ 
@@ -61,7 +72,7 @@ static void cp_dir(char* full_src, char* dst){
     strcat(command, full_src);
     strcat(command, " ");
     strcat(command, dst);
-    shell_op(command);
+    FO_shell_op(command);
 }
 
 static void cp_file(char* full_src, char* dst){
@@ -70,7 +81,7 @@ static void cp_file(char* full_src, char* dst){
     strcat(command, full_src);
     strcat(command, " ");
     strcat(command, dst);
-    shell_op(command);
+    FO_shell_op(command);
 }
 
 static bool path_exists(const char *path)
@@ -98,10 +109,16 @@ bool FO_is_dir(const char *path)
 }
 
 int FO_is_link(const char *link_path){
-    char target_path[256];
+    char target_path[MG_PATH_MAX];
+    char source[MG_PATH_MAX];
+    strcpy(source, link_path);
+    int last = strlen(source) - 1;
+    if(source[last] == '/'){
+        source[last] = 0;
+    }
 
     /* Attempt to read the target of the symbolic link. */
-    int len = readlink (link_path, target_path, sizeof (target_path));
+    int len = readlink (source, target_path, sizeof (target_path));
 
     if (len == -1) {
         if (errno == EINVAL){
@@ -238,9 +255,9 @@ static int delete(const char* root_dir, struct mg_str* source, struct mg_str* it
             strcat(full_path, item);
 
             if(FO_is_link(full_path) >= 0){
-                remove(full_path);
+                delete_file(full_path);
             }if(FO_is_file(full_path)){
-                remove(full_path);
+                delete_file(full_path);
             }else if(FO_is_dir(full_path)){
                 FO_rm_dir(full_path);
             }
@@ -365,13 +382,14 @@ static int archive(const char* root_dir, struct mg_str* source, struct mg_str* i
         }
     }while(next > 0);
 
-    shell_op(command);
+    FO_shell_op(command);
 
     strcpy(ext_response, "OK");
     return EXIT_SUCCESS;
 }
 
 int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items){
+    char command[MG_PATH_MAX] = {0};
     // get one item
     char item[MG_PATH_MAX] = {0}; 
     int next = getNextJsonArrayItem(items, item, 0);
@@ -382,6 +400,9 @@ int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items){
         strcat(src_path, item);
 
         generate_code(src_path);
+        // Backup the share code
+        char backup_code[128] = {0};
+        strcpy(backup_code, ext_response);
 
         // Prepare share folder
         char share_dir[MG_PATH_MAX] = {0}; 
@@ -392,7 +413,7 @@ int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items){
         if (stat(share_dir, &st) == -1) {
             // dir does not exist. Create it.
             mkdir(share_dir, 0700);        
-        }        
+        } 
         chdir(share_dir);
 
         // Prepare full source path
@@ -403,18 +424,15 @@ int FO_share(const char* root_dir, struct mg_str* source, struct mg_str* items){
 
         // Check if the share link already exists
         if(FO_is_link(ext_response) != 0){
-            // Generate link command
-            char command[MG_PATH_MAX] = {0};
+            // Generate link command            
             strcpy(command, "ln -s \"");
             strcat(command, srcPath);
             strcat(command, "\" ");
-            strcat(command, ext_response);     
-
-            // Backup the share code
-            strcpy(share_dir, ext_response);
-            shell_op(command);
+            strcat(command, ext_response); 
+            
+            FO_shell_op(command);
             // Restore the share code
-            strcpy(ext_response, share_dir);
+            strcpy(ext_response, backup_code);
         }
 
         // Check if shared item is a folder
